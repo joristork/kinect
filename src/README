@@ -1,0 +1,10 @@
+Get the freenect libraries and wrappers via git:
+
+https://github.com/OpenKinect/libfreenect.git
+
+build the freenect library with:
+
+mkdir build && cd build
+cmake ..
+make
+sudo make install
