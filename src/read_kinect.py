@@ -15,12 +15,18 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import cv
 import numpy as np
+import freenect
+
 def main():
     raw_input('\nLet\'s view an rgb image from the kinect:\n(Press enter)')
-    depth, rgb = freenect.sync_get_depth()[0], freenect.sync_get_video()[0]
-    plt.subplot(1,1,1)
-    plt.imshow(np.flipud(rgb))
-    plt.show()
+    try:
+        depth, rgb = freenect.sync_get_depth(), freenect.sync_get_video()
+        plt.subplot(1,1,1)
+        plt.imshow(np.flipud(rgb))
+        plt.show()
+    except:
+        print '\nHum, something went wrong. Try again...'
+        main()
 
 
 if __name__ == "__main__":
