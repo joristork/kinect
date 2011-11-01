@@ -1,13 +1,13 @@
 We'll use this file to figure out our project goal.
 Anything no longer on the table is removed from this file.
 
-
-- figure out and explain how the Kinect works:
+All of:
+1 figure out and explain how the Kinect works:
   - dot pattern with each dot uniquely identifiable by its neighbours; triangulation...
-
-- figure out specifications:
+and
+2 figure out specifications:
   - max. sensing distance; depth precision...
-
-- build an kinect-centred application:
+and
+3 build a kinect-centred application:
   - identify features, e.g. walls of a room
   - ...
