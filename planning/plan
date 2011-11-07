@@ -1,0 +1,61 @@
+Project plan: Kinect poster catcher
+Date: 7 November 2011
+
+Project team:
+    Joris Stork, Lucas Swartsenburg, Sander van Veen, Bas Weelinck, Jimi van der
+    Woning, Jeroen Zuiddam
+
+
+Project description:
+
+Our goal is threefold:
+
+1. What is a Kinect? 
+    To produce an overview of the mechanisms by which the Kinect senses colour
+    and depth data, and how it provides this to a host computer. The team
+    intends to glean this information from the web and from the software drivers
+    that we will employ to interface with the Kinect. 
+
+2. Precision of the Kinect as a scientific instrument.
+    To collect data describing the Kinect's precision as a measurement tool.
+    This may involve experimentation, although the team expects that all
+    relevant information will be available on the Web.
+
+3. Build a Kinect based application.
+    To build a command-line interfaced application in Python, on top of
+    ready-made (hacked) python wrappers for the Kinect. The application will
+    require the placement of a Kinect in a room so that it has a clear view of
+    some walls adorned with posters. The application will then process one
+    depth-rgb reading pair, so that the posters are identified and individually
+    transformed to the 2-D image plane, before being saved as separate image
+    files on the host computer.
+
+
+Time planning:
+    
+    Calendar week 45: Describe Kinect, choose and explore drivers.
+        Sub-group 1: Choose a driver --> experiment with interface
+                                     --> glean info about specs
+        Sub-group 2: web reseach --> find info about specs
+                                 --> find out "how it works"
+        The groups should input findings into the report as they go along.
+        Specifications and "how it works" sections of report should be
+        completed by the end of this week.
+
+    Calendar week 46: Sketch out application, assign modules to sub-teams.
+        Build functional model of application.
+        Assign application modules to sub-teams.
+        Tentative goals: Identify wall-planes; identify poster-like objects.
+        
+    Calendar week 47: Develop modules
+        Tentative goals: Identify posters.
+
+    Calendar week 48: Develop modules
+        Emphasis on integration and user interface.
+        Tentative goals: Transform, apply any post-processing, and save posters
+
+    Calendar week 49: Make it presentable
+        Sub-group 1: Finalise report
+        Sub-group 2: Finalise and present slideshow presentation
+        Sub-group 3: Tie up loose ends in code. 
+                     Demo application.

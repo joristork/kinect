@@ -10,4 +10,6 @@ and
 and
 3 build a kinect-centred application:
   - identify features, e.g. walls of a room
-  - ...
+  - track ball trajectory
+  - object / room 3d scanning
+  - 

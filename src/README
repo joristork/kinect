@@ -1,10 +1,14 @@
-Get the freenect libraries and wrappers via git:
+Apparently OpenNI is the way of the future. The freenect libraries are not:
 
-https://github.com/OpenKinect/libfreenect.git
 
-build the freenect library with:
+To install OpenNI:
 
-mkdir build && cd build
-cmake ..
-make
-sudo make install
+1. execute:
+git clone https://github.com/OpenNI/OpenNI.git && cd OpenNI
+
+2. view the README there
+
+
+FREENECT (defunct): Instructions at:
+
+http://openkinect.org/wiki/Getting_Started
