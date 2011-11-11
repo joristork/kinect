@@ -1,35 +1,34 @@
-"""
 #!/usr/bin/env python
-import sys
-sys.path.append("/usr/local/lib/python2.6/site-packages")
 
-import freenect
-import cv
+#import sys
+#sys.path.append("/usr/local/lib/python2.6/site-packages")
+
+#import freenect
+#import cv
 #import frame_convert
 
-cv.NamedWindow('Depth')
-cv.NamedWindow('Video')
-print('Press ESC in window to stop')
+#cv.NamedWindow('Depth')
+#cv.NamedWindow('Video')
+#print('Press ESC in window to stop')
 
 
-def get_depth():
-    return freenect.sync_get_depth()[0]
-    #return frame_convert.pretty_depth_cv(freenect.sync_get_depth()[0])
+#def get_depth():
+#    return freenect.sync_get_depth()[0]
+#    #return frame_convert.pretty_depth_cv(freenect.sync_get_depth()[0])
 
 
-def get_video():
-    return freenect.sync_get_video()[0]
-    #return frame_convert.video_cv(freenect.sync_get_video()[0])
+#def get_video():
+#    return freenect.sync_get_video()[0]
+#    #return frame_convert.video_cv(freenect.sync_get_video()[0])
 
 
-while True:
-    cv.ShowImage('Depth', get_depth())
-    cv.ShowImage('Video', get_video())
-    if cv.WaitKey(10) == 27:
-        break
-"""
+#while True:
+#    cv.ShowImage('Depth', get_depth())
+#    cv.ShowImage('Video', get_video())
+#    if cv.WaitKey(10) == 27:
+#        break
 
-#!/usr/bin/env python
+
 """
 :synopsis:  Kinect project for part 2 of Beeldbewerken course, BSc
             Informatica, University of Amsterdam. Depends on the OpenKinect's
@@ -64,6 +63,7 @@ def main():
 ##    i = i+1
 ##    if i%10 == 0:
     try:
+        freenect.init()
         depth = freenect.sync_get_depth()[0]
 ##            print 'depth:', depth
         plt.imshow(np.flipud(depth), origin="bottom")
@@ -76,6 +76,7 @@ def main():
 
     except:
         print '\nHum, something went wrong. Try again...'
+        main()
     plt.show()
 
 if __name__ == "__main__":
