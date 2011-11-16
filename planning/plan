@@ -1,5 +1,5 @@
 Project plan: Kinect 3-d object scanner
-Date: 11 November 2011
+Date: 16 November 2011
 
 Project team:
     Joris Stork, Lucas Swartsenburg, Sander van Veen, Bas Weelinck, Jimi van der
@@ -11,45 +11,48 @@ Project description:
 Our goal is threefold:
 
 1. What is a Kinect? 
-    To produce an overview of the mechanisms by which the Kinect senses colour
-    and depth data, and how it provides this to a host computer. The team
-    intends to glean this information from the web and from the software drivers
-    that we will employ to interface with the Kinect. 
+    To collect data describing the mechanisms by which the Kinect senses colour
+    and depth data, and how it provides this to a host computer, via: online
+    research; experiments; analysis of software drivers.
 
 2. Precision of the Kinect as a scientific instrument.
-    To collect data describing the Kinect's precision as a measurement tool.
-    This may involve experimentation, although the team expects that all
-    relevant information will be available on the Web.
+    To collect data describing the Kinect's precision as a measurement tool, and
+    to conduct experiments that may complement or confirm third those party
+    findings.
 
 3. Build a Kinect based application: 3-D object scanner
-    To build a command-line interfaced application in Python, on top of
-    ready-made (hacked) python wrappers for the Kinect. The application will
-    involve taking multiple Kinect recordings of a fixed object located at the
-    ideal depth-measurement distance from the Kinect. A pattern of (e.g. four
-    corners of a square) visible dots or crosses is placed on the surface on
-    which the object rests. The first recording is used to create an initial
-    point cloud representing part of the surface of the object, and a coordinate
-    system for the object is established by extracting the dot pattern from the
-    rgb image. Then, for each subsequent recording: the dot pattern is again
-    extracted from the rgb image, and a matrix to encode the transformation from
-    the initial object coordinate system to the new coordinate system is derived
-    (we conceive of it as "moving the object", not moving the camera). That
-    matrix is used to transform the new point cloud from the depth recording. We
+    To build a command-line interfaced 3-D "object scanning" application in
+    Python, on top of ready-made (freenect) python wrappers for the Kinect. The
+    application will involve taking multiple Kinect recordings (positioning the
+    Kinect by hand for each recording), of a fixed object located at the ideal
+    depth-measurement distance from the Kinect (~ 1.8m). A pattern of visible
+    dots, squares or crosses is placed on the surface on which the object rests.
+    Depth measurements are used to determine the plane incident with the visible
+    pattern. For example, an algorithm could search for a large number of
+    triangles connecting depth points, that align to the same plane. The
+    configuration of the visible patterns (and their plane) is
+    "known"/calibrated with respect to our 3D coordinate system. At least three
+    dots must be visible in any recording, in order to determine the orientation
+    of the object. The first recording is used to create an initial point cloud
+    representing part of the surface of the object, and a coordinate system for
+    the object is established by extracting the dot pattern from the rgb image.
+    Then, for each subsequent recording: the dot pattern is again extracted from
+    the rgb image, and a matrix to encode the transformation from the initial
+    object coordinate system to the new coordinate system is derived (we
+    conceive of it as "moving the object", not moving the camera). That matrix
+    is used to transform the new point cloud from the depth recording. We
     overlay the resulting point cloud in the cube-space, thus extending our 3-D
     scan. Note that, because our implementation will be in Python, this process
     will work slowly, with a recording framerate in the order of seconds.
 
 
-Time planning:
+Time planning: NB: this might stretch into week 50.
     
     Calendar week 46: Sketch out application, assign tasks to subteams
-        Sub-group 1: Choose a driver --> experiment with interface
-                                     --> glean info about specs
-        Sub-group 2: web reseach --> find info about specs
-                                 --> find out "how it works"
-        The groups should input findings into the report as they go along.
-        Build functional model of application.
-        Assign application modules, research, writing tasks to sub-teams.
+        Sub-group A: --> theory (project parts 1 and 2): conduct first 
+                         experiments.
+        Sub-group B: --> application (project part 3): produce an application
+                         functional model
         
     Calendar week 47: Develop modules, researct/write theory section
         Full draft of specifications and "how it works" sections of report
