@@ -33,17 +33,12 @@ def display_rgb(dev, data, timestamp):
     mp.figure(2)
     if image_rgb:
         corners = FindChessboardCorners(data, (6,9))
-        try:
-            DrawChessboardCorners(data,(6,9),corners,len(corners))
-        Exception e:
-            print "bla"
-        for i in xrange(len(corners[1])):
-            mp.plot(corners[1][i][0], corners[1][i][1], 'r+')
+        for co in corners[1]:
             #line_coords = find_line(corners[1])
             #for co in line_coords:
             #    data = set_dot(co[0],co[1],data)
-            for co in corners[1]:
-                data = set_dot(co[0], co[1], data)
+            
+            data = set_dot(co[0], co[1], data)
         image_rgb.set_data(data)
     else:
         image_rgb = mp.imshow(data, interpolation='nearest', animated=True)
