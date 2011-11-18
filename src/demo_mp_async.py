@@ -3,6 +3,7 @@ import freenect
 import matplotlib.pyplot as mp
 import signal
 import frame_convert
+import scipy
 
 mp.ion()
 image_rgb = None
@@ -29,6 +30,7 @@ def display_rgb(dev, data, timestamp):
         image_rgb.set_data(data)
     else:
         image_rgb = mp.imshow(data, interpolation='nearest', animated=True)
+        scipy.misc.imsave('rgb.png', data)
     mp.draw()
 
 
