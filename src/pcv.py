@@ -35,7 +35,7 @@ def point_array_numpy(depth):
     NumPy version of point array, that allows for speed improvements.
     """
 
-    return reshape(dstack([cached_3d_grid, depth]), (-1, 3))
+    return reshape(dstack([cached_3d_grid, 2047 - depth]), (-1, 3))
 
 pts = None
 
