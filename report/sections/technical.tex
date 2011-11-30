@@ -1,0 +1,89 @@
+This chapter presents the results of our research into the technical
+underpinnings of the Kinect as a sensing device. Section \ref{howitworks}
+describes techniques implemented in the Kinect to produces depth maps, in terms
+of standard concepts from the field of machine vision. Then, section
+\ref{precision} presents measurements, estimates and published data, which
+together characterise the precision of the Kinect as a measurement tool.
+
+\section{Overview: What is a Kinect}
+
+The Kinect device is a sensor array incorporating, most notably, a system for
+depth measurement. This system relies on a technique that enables low-cost
+implementations. Several founders of an Israeli technology firm, PrimeSense Ltd,
+invented the technique sometime before 11 October 2005 \cite{ZALEVSKY:2007}.
+Microsoft corp., in turn, began selling the Kinect-branded implementation on 10
+November 2010 as an optional user interface for its consumer gaming platform,
+the Xbox 360.
+
+%describe reverse engineering, drivers, and api's in this section?
+%
+%nb: patents vs patent applications (the latter: garcia:2008)
+%
+%nb: method and system for object reconstruction, depth ranging with moire
+%patterns; optical designs for zero order reconstruction; not saved or printed
+%out yet
+%
+%common applications in this section?
+
+\subsection{Specifications}
+
+Table \ref{tab:specs} provides an overview of the electronic components that
+comprise the Kinect's sensor array.
+
+%nb: REF means reference to be included
+%
+\begin{table}[h]
+\centering
+\begin{tabular}{l p{10cm}}
+\toprule
+Component & Description \\
+\midrule
+
+RGB Camera & with 640x480 pixels at 8-bit (REF via wiki) and with Bayer filter
+(REF via wiki) \\
+
+% Jeroen - we need some table ninja skills here! multiline subrows...
+Infrared camera & Monochrome CMOS sensor (REF via wiki) with 640x480 pixels at
+11-bit (REF via wiki), field of view at 57 degrees horizontal, 43 degrees
+vertical (REF via wiki), and with adjustable range (REF via wiki) \\ Infrared
+projector & laser (REF) / ? (REF) \\
+
+Accelerometer & descr \\
+
+Microphone & ``Multiarray'' microphone (REF via wiki) consisting of four
+microphone "capsule" (REF via wiki), with each channel at 16-bit, 16KHz sampling
+(REF via wiki). \\
+
+\bottomrule
+\end{tabular}
+\caption{Specifications of the Kinect}
+\label{tab:specs}
+\end{table}
+
+\section{Theory: How it works}
+\label{howitworks}
+
+tell it how it is with foot/endnotes:
+
+\subsection{Stereo triangulation}
+
+the depth mapping employs triangulation
+
+triangulation is...
+
+\subsection{Stereo triangulation with projected dot pattern}
+
+in the kinect a corresponds to a' etc
+
+
+\section{Precision of the intrument}
+\label{precision}
+
+\subsection{Depth precision}
+depth precision
+
+\subsubsection{Sources of error}
+
+\subsection{Depth image resolution}
+
+\subsubsection{Sources of error}

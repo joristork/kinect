@@ -2,6 +2,8 @@
 
 \documentclass{scrreprt}
 \usepackage[pdfborder={0 0 0}]{hyperref}
+\usepackage{booktabs,biblatex}
+\bibliography{refs}
 %\usepackage{graphicx,amsmath,listings,subfig}
 
 \title{
@@ -17,45 +19,26 @@
 \maketitle
 \tableofcontents
 
+
 \chapter{Introduction}\label{ch:introduction}
     \input{sections/introduction}
 
 
-\chapter{Method} 
-\label{ch:method}
-    \input{sections/method}
+\chapter{Technical description}
+\label{ch:technical}
+    \input{sections/technical}
 
 
-\chapter{How it works}
-\label{ch:howitworks}
-    \input{sections/howitworks}
-
-
-\chapter{Specifications and precision}
-\label{ch:howitworks}
-    \input{sections/precision}
-
-
-\chapter{Results} 
-\label{ch:results}
-    \input{sections/results}
-
-
-\chapter{Discussion} 
-\label{ch:discussion}
-    \input{sections/discussion}
-
-
-\chapter{Acknowledgements} 
-\label{ch:discussion}
-    \input{sections/acknowledgements}
+\chapter{Application} 
+\label{ch:application}
+    \input{sections/application}
 
 
 \appendix
 
 \chapter{Stuff} 
 \label{ch:appendixA}
-    \input{sections/appendixA}
 
 
+\printbibliography
 \end{document}
