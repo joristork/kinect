@@ -1,0 +1,40 @@
+
+\section{Components}
+
+What follows is a listing of application components.
+
+\subsection{Point Cloud Viewer}
+
+The point cloud viewer was developed after examining various possible
+bases, such as: PCL(see pcl.org, A very large production-class project for
+anything to do with point clouds), PyGame and Visual. Visual is also know
+as VPython.
+
+For a very short period of time we tried using the mpl_toolkit provided
+by matplotlib, but as it has no support for OpenGL it isn't very suited
+for rendering a large amount of points in 3D.
+
+The PCL library was of course
+very tempting, but very soon it became apparent this was way too much horse
+power for our needs. What we needed was a simple interface that allowed viewing
+of point clouds, rotating, moving and zooming them with mouse and keyboard
+controls.
+
+PyGame allows for very easy initialisation of OpenGL using SDL and can therefore
+easily handle point clouds using most of today's graphics hardware. But it still
+did not provide an easy way of controlling the camera, and rotation would require
+using some sort of mathematical library implementing quaternion spherical rotation.
+
+Enter VPython, a package attempting to implement a simple 3D programming
+language on top of Python and allowing interactive terminal control of the
+3D scene. VPython officially is composed of: Python (of course), IDLE the
+interactive Python programming environment and the visual module. When we
+discoverd the visual module used OpenGL, offers mouse orientation
+controls by default, and to top it off uses NumPy for all its data manipulation
+our course of action became very clear. Since the Kinect library provides its
+data in NumPy arrays, after simple manipulation the point clouds can be fed into
+visual with the simple command "points".
+
+Currently the point cloud viewer does not support realtime capture but capture
+is done quickly and easily using the 'c' key.
+
