@@ -22,7 +22,7 @@ controls.
 
 PyGame allows for very easy initialisation of OpenGL using SDL and can therefore
 easily handle point clouds using most of today's graphics hardware. But it still
-did not provide an easy way of controlling the camera, and rotation would require
+did not provide an easy way of controlling the camera. Rotation would require
 using some sort of mathematical library implementing quaternion spherical rotation.
 
 Enter VPython, a package attempting to implement a simple 3D programming
@@ -35,6 +35,6 @@ our course of action became very clear. Since the Kinect library provides its
 data in NumPy arrays, after simple manipulation the point clouds can be fed into
 visual with the simple command "points".
 
-Currently the point cloud viewer does not support realtime capture but capture
+Currently the point cloud viewer does not support realtime capture, but capture
 is done quickly and easily using the 'c' key.
 
