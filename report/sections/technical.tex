@@ -39,26 +39,47 @@ comprise the Kinect's sensor array.
 Component & Description \\
 \midrule
 
-RGB Camera & with 640x480 pixels at 8-bit (REF via wiki) and with Bayer filter
-(REF via wiki) \\
+RGB Camera & Sensor ``very similar'' to Micron mt9v112 (1/6" VGA CMOS) but
+``larger'' and with some differing registers. Bayer colour pattern (RG,GB).
+640x480 pixels, 8-bit at 30Hz.  1280x1024 pixels at 10Hz if using OpenNI backend
+, though this is referred to as ``15Hz'' in low level protocol. UYVY colour
+format also possible at ``15Hz'' framerate.\cite{FREENECT}\cite{RGBDEMO} \\
 
-% Jeroen - we need some table ninja skills here! multiline subrows...
-Infrared camera & Monochrome CMOS sensor (REF via wiki) with 640x480 pixels at
-11-bit (REF via wiki), field of view at 57 degrees horizontal, 43 degrees
-vertical (REF via wiki), and with adjustable range (REF via wiki) \\ Infrared
-projector & laser (REF) / ? (REF) \\
+Infrared camera & Monochrome CMOS sensor (no reliable source for this). Three
+options for pixel size: ``small'' (unspecified); 640x480; 1280x1024. Framerate
+options are 15Hz and 30Hz, except at maximum resolution (~9Hz).\cite{FREENECT}
+field of view at 57 degrees horizontal, 43 degrees vertical according to retail
+description.\cite{PLAY} Range reportedly ``adjustable'' (unconfirmed source) \\ 
 
-Accelerometer & descr \\
+Depth stream & Uncompressed data stream 16 bits, though this causes device
+bandwidth problems. Usable options: ``differential/RLE'' compressed 11-bit
+stream; 10-bit stream; 11-bit stream (uncompressed? still to be confirmed). The
+only usable pixel size is 640x480. Framerate: 30Hz. \cite{FREENECT} Depth range
+1.2m to 3.5m according to retail description.\cite{PLAY} Actual range
+capability: ~ 0.7m-0.6m (unconfirmed source).\\
 
-Microphone & ``Multiarray'' microphone (REF via wiki) consisting of four
-microphone "capsule" (REF via wiki), with each channel at 16-bit, 16KHz sampling
-(REF via wiki). \\
+Infrared projector & Although non-reliable internet documents refe the use of a
+``laser'' to project the infrared speckle pattern, this is unconfirmed. One
+patent application relating to the Kinect describes a projecting a ``pattern of
+coherent radiation''.\cite{SHPUNT:2010-1} Section \ref{howitworks} provides more
+detail regading the projection component. \\
+
+Accelerometer & Kionix KXSD9 Series. Sensitivity: 819 counts per g of
+acceleration. Reports device tilt relative to the
+horizon.\cite{FREENECT}\cite{KIONIX}\\
+
+Microphone & ``Multiarray'' microphone consisting of four microphone units. Each
+microphone generates two streams of 32 bit signed little endian PCM samples at
+16KHz. A ninth channel from the device provides a unified noise-cancelled signal
+in 16-bit little endian PCM samples (16KHz).\cite{FREENECT}\\
 
 \bottomrule
 \end{tabular}
 \caption{Specifications of the Kinect}
 \label{tab:specs}
 \end{table}
+
+The low-level interface includes the option for depth smoothing.
 
 \section{Theory: How it works}
 \label{howitworks}
