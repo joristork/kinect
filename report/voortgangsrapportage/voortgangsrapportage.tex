@@ -1,0 +1,85 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\author{
+  J.\ Stork, L.\ Swartsenburg,  S.\ Van Veen, B.\ Weelinck,\and J.\ Van der Woning, J.\ Zuiddam 
+} % Normally, you would use \and s only, not ',' s, but this looks better.
+\title{Voortgangsrapport 2 december}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{Inleiding}
+Het Kinect project dat we bedacht hebben is tweedelig, waardoor er als snel een tweedeling in de groep ontstond. Het eerste deel van ons project betreft het onderzoeken van technische aspecten. Met name de hardware en de algoritmes worden onderzocht. Het tweede deel betreft het maken van een applicatie waarin de Kinect zijn mogelijkheden toont. Het doel is om een 3d representatie te maken van een object dat we inscannen met de Kinect. Binnen het groepje dat aan de gang ging met het maken van een applicatie onstond er ook al snel een tweesplitsing: een deel ging aan de gang met het verzamelen van data met behulp van de Kinect en het andere deel ging op zoek om de gevonden beelden te visualiseren. Dit voortgangsrapport beschrijft waar elk groepslid mee bezig is geweest, wat er bereikt is en wat er nog gedaan moet worden. 
+
+\section{Specificaties Kinect}
+Joris en Jeroen zijn aan de slag gegaan om meer over de werking van de Kinect te weten te komen. 
+
+\subsection{Wat is er gedaan?}
+\begin{itemize}
+\item algemene structuur rapport gemaakt
+\item opzet van inleiding en specificaties geschreven
+\item online technisch onderzoek naar werking dieptemeting gedaan: patenten; (onderzoeks) artikelen; wikis; blogs;
+\item definitieve theorie gevonden achter dieptemetingen
+\item een ``proof of concept'' opgezet voor deze theorie
+\end{itemize}
+\subsection{Wat moet er nog gedaan worden?}
+\begin{itemize}
+\item experiment(en): precisie van diepte metingen
+\item proof of concept uitbouwen
+\item sectie schrijven: "theory: how it works"
+\item sectie schrijven: "precision of the instrument"
+\end{itemize}
+
+\section{Applicatie}
+Zoals beschreven in de inleiding, is het ontwikkelen van de applicatie opgesplitst in twee groepen. Een groep is bezig met het visualiseren van data en de andere groep is bezig met het binnen halen van data / object scannen.
+\subsection{Data visualisatie}
+Bas en Sander zijn aan de slag gegaan met het visualiseren van data. 
+\subsubsection{Wat is er gedaan?}
+\begin{itemize}
+\item onderzoek naar visualisatie methodes en libraries (Vpython)
+\item onderzoek naar drivers voor de Kinect en de koppeling met Python (freenect)
+\item onderzoek naar de vorm van de data (numpy array)
+\item een applicatie schrijven die gebruik maakt van Vpython om data uit de Kinect te visualiseren
+\end{itemize}
+\subsubsection{Wat moet er nog gedaan worden?}
+\begin{itemize}
+\item koppeling met de object scanner
+\item vloeiender visualiseren van nieuw ingewonnen data
+\end{itemize}
+
+\subsection{Object scannen}
+Bij het object scannen zijn we tegen het een en ander aan moeilijkheden opgelopen, waardoor de ontwikkeling niet zo soepel loopt als gewenst. Als Sander en Bas lekker opschieten met de data visualisatie, dan is het in de komende tijd wenselijk als bijgschoten wordt. 
+\subsubsection{Wat is er gedaan?}
+\begin{itemize}
+\item onderzoek naar drivers voor de Kinect en de koppeling met Python (freenect)
+\item onderzoek naar de vorm van de data (numpy array)
+\item onderzoek naar de mogelijkheden die OpenCV, Numpy en Scipy bieden (OpenCV is veel sneller, maar documentatie is een troep)
+\item onderzoek naar de beste manier om het object in te scannen. Het idee is nu:
+\begin{itemize}
+\item scan het RGB beeld voor het speelveld, d.m.v. kleuren. (niet checkerboard, het herkennen daarvan ging erg moeilijk)
+\item besluit wat het te scannen object is door naar het speelveld te kijken.
+\item bepaal orientatie van de Kinect ten opzichten van het object
+\item 3d transformatie van het object naar het beeld
+\item gebruik diepte gegevens om meer over de object vorm te weten te komen. 
+\end{itemize}
+\item onderzoek naar werken met een checkerboard
+\item het schrijven van een applicatie die realtime checkerboard herkenning toepaste met behulp van OpenCV
+\item het schrijven van een applicatie die kleuren herkent en abstraheert uit de Kinect data zodat een werkveld gedefinieerd kan worden
+\end{itemize}
+\subsubsection{Wat moet er nog gedaan worden?}
+\begin{itemize}
+\item afmaken speelveldherkenning
+\item implementeren van object herkenning
+\item implementeren van orientatiebepaling
+\item implementeren van 3d transformatie
+\item het maken van een beeld gebaseerd op de ingewonnen gegevens
+\item koppeling met de point cload viewer
+\end{itemize}
+
+\section{Samenvatting}
+Er is al veel gedaan door de verschillende subgroepen, maar met name bij het object scannen is er nog veel te doen. De beschikbare implementatie van algoritmen die we willen gebruiken bij het object scannen zijn vaak niet of moeilijk bruikbaar, waardoor er veel tijd komt te zitten in hacken. Dit is niet de bedoeling en wellicht moeten we herevalueren. Interessant worden de experimenten van het specificatie team, de komende weken hopen we steeds meer te weten over de Kinect. De data visualisatie lijkt op te schieten.
+
+
+\end{document}
