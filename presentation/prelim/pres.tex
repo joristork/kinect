@@ -1,0 +1,85 @@
+% Workshop wiskunde,  Jeroen Zuiddam
+
+% beamer
+\documentclass{beamer}
+\mode<presentation>
+
+% packages
+\usepackage{amsmath,amssymb, amsfonts,mathrsfs}
+\usepackage[dutch]{babel}
+%\usepackage{hyperref}
+\usepackage{graphicx}
+%\usepackage{tikz}
+%\usepackage{pgfplots}
+%\usetikzlibrary{arrows}
+%\usetikzlibrary{positioning}
+%\usepackage{stmaryrd}
+\usetheme{Watergraafsmeer}
+
+\usepackage{enumerate}
+
+% For every picture that defines or uses external nodes, you'll have to
+% apply the 'remember picture' style. To avoid some typing, we'll apply
+% the style to all pictures.
+%\tikzstyle{every picture}+=[remember picture]
+
+% front stuff
+\author{Joris Stork en Jeroen Zuiddam}
+\title{Kinect: hoe werkt het?}
+\date{}
+
+\begin{document}
+
+%% frame %%
+\setbeamercolor{headline}{parent=white}
+\begin{frame}
+\titlepage
+\end{frame}
+\setbeamercolor*{headline}{parent=palette primary}
+\section{}
+
+\begin{frame}{Kinect}
+Plaatje kinect
+\pause
+\begin{enumerate}
+\item triangulatie
+\item correspondence problem
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Stereotriangulatie}
+
+{\large Algemene situatie}
+
+plaatje
+\pause
+\\\quad\\
+{\large Voorbeeld met twee parallele pinhole cameras}
+\pause
+$$
+\frac{z_1}{b} = \frac{z_1 - f}{b-x_l+x_r}\quad \pause\implies\quad z_1 = \frac {bf} {x_l - x_r}
+$$
+\end{frame}
+
+\begin{frame}{Actieve stereotriangulatie}
+
+{\large Kinect}
+\end{frame}
+
+\begin{frame}{Correspondence problem}
+{\large Een oplossing}
+
+\begin{enumerate}
+\item<+-> referentiebeelden maken
+\item<+-> neem camerabeeld
+\item<+-> voor elk punt
+\begin{enumerate}[a.]
+\item<+-> neem regio
+\item<+-> bepaal schaal
+\item<+-> correleer regio over referentiebeeld met die schaal
+\item<+-> punt met hoogste correlatie is referentiepunt
+\end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\end{document}

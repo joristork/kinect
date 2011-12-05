@@ -1,0 +1,57 @@
+% Watergraafsmeer theme. Jeroen Zuiddam
+
+\DeclareOptionBeamer{compress}{\beamer@compresstrue}
+\ProcessOptionsBeamer
+
+\mode<presentation>
+
+\usetheme{boxes}
+\useoutertheme[]{default}
+\useinnertheme{circles} % contents: not used
+\usecolortheme{whale} % header
+\usecolortheme{orchid} % block
+
+\definecolor{beamer@blendedblue}{rgb}{0.137,0.466,0.741}
+\definecolor{beamer@blendedgreen}{rgb}{0.227,0.741,0.137}
+
+\setbeamercolor{structure}{fg=beamer@blendedblue}
+\setbeamercolor{titlelike}{parent=structure}
+\setbeamercolor{frametitle}{fg=black}
+\setbeamercolor{title}{fg=black}
+\setbeamercolor{item}{fg=black}
+
+% Override some colors
+\setbeamercolor*{frametitle}{parent=palette secondary}
+\setbeamercolor{headline}{parent=palette primary}
+\setbeamercolor*{title}{parent=palette secondary}
+
+% Change block title size
+\setbeamerfont{block title}{size={}}
+
+% Only page number in footline.
+\setbeamertemplate{footline}[page number]{}
+
+% No navigation symbols.
+\setbeamertemplate{navigation symbols}{}
+
+% This is an alternative block environment with green background color.
+\newenvironment{altblock}
+{
+\setbeamercolor{structure}{fg=beamer@blendedgreen}
+\begin{block}
+}
+{
+\end{block}
+\setbeamercolor{structure}{fg=beamer@blendedblue}
+}
+
+% Use roman math font.
+\usefonttheme{professionalfonts}
+
+
+\setbeamertemplate{itemize items}[default]
+\setbeamertemplate{enumerate items}[default]
+
+\mode
+<all>
+
