@@ -6,3 +6,4 @@ links
  - Pattern: http://azttm.wordpress.com/2011/04/03/kinect-pattern-uncovered/ 
  - primesense info: http://web.archive.org/web/20110715113252/http://www.primesense.com/?p=535, 
    http://web.archive.org/web/20110715113252/http://www.primesense.com/?p=514
+ - Correspondence problem: www.cse.unr.edu/~bebis/CS791E/Notes/StereoCorrespondenceProblem.pdf
