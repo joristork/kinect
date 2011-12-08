@@ -181,36 +181,48 @@ def handle_new_capture(depth, rgb):
     """
     print "New data captured"
     global points
+    # Height of cubicle
+    height = 200
     points_3d = []
     for p in points:
         points_3d.append(np.array([p[0],p[1],depth[p[1]][p[0]]], dtype=float))
-    green = points_3d[0]
-    blue = points_3d[1]
-    red = points_3d[2]
-    black = points_3d[3]
+        
+    # <------------------------- Slow, but very clear way --------------------->    
     
-    green_h = np.cross((blue - green),(black - green))
-    green_h = green_h / np.linalg.norm(green_h)
-    green_h = (green_h * 200) + green
+    #green = points_3d[0]
+    #blue = points_3d[1]
+    #red = points_3d[2]
+    #black = points_3d[3]
+        
+    #green_h = np.cross((blue - green),(black - green))
+    #green_h = green_h / np.linalg.norm(green_h)
+    #green_h = (green_h * 200) + green
     
-    blue_h = np.cross((red - blue),(green - blue))
-    blue_h = blue_h / np.linalg.norm(blue_h)    
-    blue_h = (blue_h * 200) + blue
+    #blue_h = np.cross((red - blue),(green - blue))
+    #blue_h = blue_h / np.linalg.norm(blue_h)    
+    #blue_h = (blue_h * 200) + blue
 
-    red_h = np.cross((black - red),(blue - red))
-    red_h = red_h / np.linalg.norm(red_h)    
-    red_h = (red_h * 200) + red    
+    #red_h = np.cross((black - red),(blue - red))
+    #red_h = red_h / np.linalg.norm(red_h)    
+    #red_h = (red_h * 200) + red    
     
-    black_h = np.cross((green - black),(red - black))
-    black_h = black_h / np.linalg.norm(black_h)    
-    black_h = (black_h * 200) + black    
+    #black_h = np.cross((green - black),(red - black))
+    #black_h = black_h / np.linalg.norm(black_h)    
+    #black_h = (black_h * 200) + black    
     
-    points.append((int(green_h[0]),int(green_h[1])))
-    points.append((int(blue_h[0]),int(blue_h[1])))
-    points.append((int(red_h[0]),int(red_h[1])))
-    points.append((int(black_h[0]),int(black_h[1])))
+    #points.append((int(green_h[0]),int(green_h[1])))
+    #points.append((int(blue_h[0]),int(blue_h[1])))
+    #points.append((int(red_h[0]),int(red_h[1])))
+    #points.append((int(black_h[0]),int(black_h[1])))
 
-
+        
+    # <------------------------- Fast, clean way ----------------------------->
+    cubic = []
+    for i in xrange(4):
+        cubic.append(np.cross((points_3d[((i + 1) % 4)] - points_3d[i]),(points_3d[((i + 3) % 4)] - points_3d[i])))
+        cubic[i] = cubic[i] / np.linalg.norm(cubic[i]) 
+        cubic[i] = (cubic[i] * height) + points_3d[i]
+        points.append((int(cubic[i][0]),int(cubic[i][1])))
 
 def mouseclick(event,x,y,flags,param):
     """
