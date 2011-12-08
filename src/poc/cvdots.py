@@ -13,7 +13,7 @@ res_height = img_height - tpl_height + 1;
 
 res = cv.CreateImage( (res_width, res_height) , cv.IPL_DEPTH_32F, 1 );
 
-cv.MatchTemplate( img, tpl, res, cv.CV_TM_SQDIFF );
+cv.MatchTemplate( img, tpl, res, cv.CV_TM_CCOEFF_NORMED );
 
 minval, maxval, minloc, maxloc = cv.MinMaxLoc( res );
 

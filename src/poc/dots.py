@@ -60,7 +60,7 @@ def create_part_img(part):
 
 def get_corr(dots, part):
 
-    corr = correlate(dots, part)
+    corr = correlate(dots, part, output = np.float64)
     return corr
 
 dots = create_dots(100,100,4000)
@@ -71,7 +71,23 @@ create_part_img(part)
 
 
 corr = get_corr(dots, part)
+corr_copy = corr.copy()
+for x in xrange(corr.shape[0]):
+    for y in xrange(corr.shape[1]):
+        if x < 30 or x > (corr.shape[0]-30) or y < 30 or y > (corr.shape[1]-30):
+            corr_copy[y,x] = 0
+
+target = unravel_index(argmax(corr_copy), corr_copy.shape)
 create_part_img(corr)
+
+fig = figure(figsize=(6,6))
+ax = fig.add_axes([0,0,1,1])
+ax.imshow(corr_copy, 'gray')
+ax.set_aspect(1)
+ax.set_axis_off()
+
+ax.add_patch(Circle((target[1], target[0]), radius= 35 , alpha = 0.5))
+
 
 show()
 
