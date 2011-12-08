@@ -96,10 +96,10 @@ def print_square(im):
     This function makes the black square - that helps selecting corners - in
     the left corner of the rgb window 
     """ 
-    cv.Line(im,(12,60),(12,90),(0,0,0))
-    cv.Line(im,(32,60),(32,90),(0,0,0))
-    cv.Line(im,(12,90),(32,90),(0,0,0))
-    cv.Line(im,(12,60),(32,60),(0,0,0))    
+    cv.Line(im,(12,60),(12,90),(255,0,0))
+    cv.Line(im,(32,60),(32,90),(255,0,0))
+    cv.Line(im,(12,90),(32,90),(255,0,0))
+    cv.Line(im,(12,60),(32,60),(255,0,0))    
 
 def display_result(depth, data, p, screentitle):
     """
@@ -174,7 +174,12 @@ def body(*args):
         print 
      
 def handle_new_capture(depth, rgb):
-    print "New data taken"
+    """
+    This function is responsible for all the calculations. For now, it adds
+    points to the image so that we can see the 3 dimensional cubicle in which
+    we are working. Later this function will be used to scan for values.
+    """
+    print "New data captured"
     global points
     points_3d = []
     for p in points:
@@ -200,16 +205,10 @@ def handle_new_capture(depth, rgb):
     black_h = black_h / np.linalg.norm(black_h)    
     black_h = (black_h * 200) + black    
     
-    print green_h
-    print blue_h
-    print red_h
-    print black_h
-    
     points.append((int(green_h[0]),int(green_h[1])))
     points.append((int(blue_h[0]),int(blue_h[1])))
     points.append((int(red_h[0]),int(red_h[1])))
     points.append((int(black_h[0]),int(black_h[1])))
-    print points
 
 
 
@@ -223,7 +222,7 @@ def mouseclick(event,x,y,flags,param):
         if len(points) == 0:
            capture = True
         if fake:
-            points = [(216, 302), (490, 328), (463, 201), (302, 190)]
+            points = [(215, 300), (495, 328), (468, 199), (299, 187)]
         else:
             points.append((x,y))
         print points
