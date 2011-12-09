@@ -15,6 +15,7 @@ fake = False
 
 depth_np = None
 rgb_np = None
+cubic = []
 
 def displaypoints(im, points):
     """ Display points in a given images, used for rgb and depth """
@@ -51,6 +52,7 @@ def print_instructions(im):
     This function helps the user by giving instructions. Circles are drawn in
     a square to determine which corner needs to be clicked.
     """
+    global capture
     font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5, 0, 1, 8)
     if len(points) == 1:
         cv.PutText(im,"Please right-click on the blue corner to begin the capture",(2, 20), font, (0,0,0))
@@ -74,9 +76,11 @@ def print_instructions(im):
         cv.Circle(im,(32,90),3,(0,0,0),-1)
         cv.Circle(im,(32,60),3,(0,0,0),-1)
         cv.Circle(im,(12,60),4,(0,0,0),-1)
-    elif len(points) == 4:
-        cv.PutText(im,"Use right-click to finalize the capture",(2, 20), font, (0,0,0))
-    elif len(points) > 4:
+    elif len(points) <= 8:
+        if capture:
+            cv.PutText(im,"Use right-click to finalize the capture",(2, 20), font, (0,0,0))
+            
+    elif len(points) > 8:
         pass
     else:
         cv.PutText(im,"Please right-click on the green corner to begin the capture",(2, 20), font, (0,0,0))
@@ -111,8 +115,11 @@ def display_result(depth, data, p, screentitle):
     data_old = np.array(data)
     if depth:
         im = frame_convert.pretty_depth_cv(data_old)        
+        if len(p) == 4:
+            make_cubicle(data)        
     else:
         im = frame_convert.video_cv(data)
+    
     displaypoints(im, p)
     im_cp = cv.CloneImage(im)
     if not depth:
@@ -172,7 +179,28 @@ def body(*args):
         raise freenect.Kill
     if not capture and depth_np and rgb_np:
         print 
-     
+
+
+def make_cubicle(depth):
+    """
+    This function is responsible for all the calculations. For now, it adds
+    points to the image so that we can see the 3 dimensional cubicle in which
+    we are working. Later this function will be used to scan for values.
+    """
+    global points, cubic
+    # Height of cubicle
+    height = 200
+    points_3d = []
+    for p in points:
+        points_3d.append(np.array([p[0],p[1],depth[p[1]][p[0]]], dtype=float))
+        
+    for i in xrange(4):
+        cubic.append(np.cross((points_3d[((i + 1) % 4)] - points_3d[i]),(points_3d[((i + 3) % 4)] - points_3d[i])))
+        cubic[i] = cubic[i] / np.linalg.norm(cubic[i]) 
+        cubic[i] = (cubic[i] * height) + points_3d[i]
+        points.append((int(cubic[i][0]),int(cubic[i][1])))
+
+
 def handle_new_capture(depth, rgb):
     """
     This function is responsible for all the calculations. For now, it adds
@@ -180,56 +208,15 @@ def handle_new_capture(depth, rgb):
     we are working. Later this function will be used to scan for values.
     """
     print "New data captured"
-    global points
-    # Height of cubicle
-    height = 200
-    points_3d = []
-    for p in points:
-        points_3d.append(np.array([p[0],p[1],depth[p[1]][p[0]]], dtype=float))
+    global cubic
         
-    # <------------------------- Slow, but very clear way --------------------->    
-    
-    #green = points_3d[0]
-    #blue = points_3d[1]
-    #red = points_3d[2]
-    #black = points_3d[3]
-        
-    #green_h = np.cross((blue - green),(black - green))
-    #green_h = green_h / np.linalg.norm(green_h)
-    #green_h = (green_h * 200) + green
-    
-    #blue_h = np.cross((red - blue),(green - blue))
-    #blue_h = blue_h / np.linalg.norm(blue_h)    
-    #blue_h = (blue_h * 200) + blue
-
-    #red_h = np.cross((black - red),(blue - red))
-    #red_h = red_h / np.linalg.norm(red_h)    
-    #red_h = (red_h * 200) + red    
-    
-    #black_h = np.cross((green - black),(red - black))
-    #black_h = black_h / np.linalg.norm(black_h)    
-    #black_h = (black_h * 200) + black    
-    
-    #points.append((int(green_h[0]),int(green_h[1])))
-    #points.append((int(blue_h[0]),int(blue_h[1])))
-    #points.append((int(red_h[0]),int(red_h[1])))
-    #points.append((int(black_h[0]),int(black_h[1])))
-
-        
-    # <------------------------- Fast, clean way ----------------------------->
-    cubic = []
-    for i in xrange(4):
-        cubic.append(np.cross((points_3d[((i + 1) % 4)] - points_3d[i]),(points_3d[((i + 3) % 4)] - points_3d[i])))
-        cubic[i] = cubic[i] / np.linalg.norm(cubic[i]) 
-        cubic[i] = (cubic[i] * height) + points_3d[i]
-        points.append((int(cubic[i][0]),int(cubic[i][1])))
 
 def mouseclick(event,x,y,flags,param):
     """
     Handler for a click in the HighGUI screen, used to determine the place
     of corners
     """
-    global points, capture, depth_np, rgb_np, fake
+    global points, capture, depth_np, rgb_np, fake, cubic
     if len(points) < 4 and event == cv.CV_EVENT_LBUTTONUP:
         if len(points) == 0:
            capture = True
@@ -237,16 +224,17 @@ def mouseclick(event,x,y,flags,param):
             points = [(215, 300), (495, 328), (468, 199), (299, 187)]
         else:
             points.append((x,y))
-        print points
-        
-    elif len(points) >= 4 and len(points) < 8 and event == cv.CV_EVENT_LBUTTONUP :
+            
+    elif len(points) >= 4 and event == cv.CV_EVENT_LBUTTONUP and capture:
         handle_new_capture(depth_np, rgb_np)
+        capture = False
         
     if event == cv.CV_EVENT_RBUTTONUP:
         points = []
         capture = False
         depth_np = None
-        rgb_np = None            
+        rgb_np = None         
+        cubic = []   
 
 if __name__ == '__main__':
     cv.SetMouseCallback("RGB",mouseclick,None)
