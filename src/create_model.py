@@ -109,11 +109,12 @@ def display_result(depth, data, p, screentitle):
     in a screen. In the rgb window, some text is added and in both windows
     the points that are clicked are added.
     """
+    global cubic
     im = None
     data_old = np.array(data)
     if depth:
         im = frame_convert.pretty_depth_cv(data_old)        
-        if len(p) == 4:
+        if len(p) == 4 and len(cubic) == 0:
             make_cubicle(data)        
     else:
         im = frame_convert.video_cv(data)
@@ -191,20 +192,20 @@ def make_cubicle(depth):
     global points, cubic
     # Height of cubicle
     height = 200
-    for (i,p) in enumerate(points):
-        cubic.append(np.array([p[0],p[1],depth[p[1]][p[0]]], dtype=float))
-        if depth[p[1]][p[0]] > 2000:
-            print "Point no. ", i, " is probably in a blind spot. Please start over."
-        
-        
+    
     for i in xrange(4):
-        cubic.append(np.cross((cubic[((i + 1) % 4)] - cubic[i]),(cubic[((i + 3) % 4)] - cubic[i])))
+        cubic.append(np.array([points[i][0],points[i][1],depth[points[i][1]][points[i][0]]], dtype=float))
+        if depth[points[i][1]][points[i][0]] > 2000:
+            print "Point no. ", i, " is probably in a blind spot. Please start over."
+    
+    
+    for i in xrange(4):
+        cubic = cubic + [np.cross((cubic[((i + 1) % 4)] - cubic[i]),(cubic[((i + 3) % 4)] - cubic[i]))]
         cubic[i + 4] = cubic[i + 4] / np.linalg.norm(cubic[i + 4]) 
         cubic[i + 4] = (cubic[i + 4] * height) + cubic[i]
         
         if not isNaN(cubic[i + 4][0]) and not isNaN(cubic[i + 4][1]):
-            points.append((int(cubic[i + 4][0]),int(cubic[i + 4][1])))     
-        
+            points.append((int(cubic[i + 4][0]),int(cubic[i + 4][1])))         
         
     
 
@@ -216,14 +217,60 @@ def handle_new_capture(depth, rgb):
     we are working. Later this function will be used to scan for values.
     """
     print "New data captured"
-    global cubic
-    for (i,cub) in enumerate(cubic):
-        print i, cub - cubic [4]
+    global cubic, intrinsic_matrix, distortion
+    
+    
+    if intrinsic_matrix == None or distortion == None:
+       print "Can't handle the capture because the intrinsic matrix and distortion aren't set yet."
+
     
     objectpoints = [(0,100,0),(100,100,0),(100,100,200),(0,100,200)]
-    imagepoints = [(cubic[0][0],cubic[0][1]),(cubic[1][0],cubic[1][1]),(cubic[2][0],cubic[2][1]),(cubic[3][0],cubic[3][1])]
+    npoints = len(objectpoints)
+    imagepoints = []
+    
+    o_points = cv.CreateMat(npoints, 3, cv.CV_32FC1)
+    i_points = cv.CreateMat(npoints, 2, cv.CV_32FC1)
+    
+
+    for i in xrange(npoints):
+        o_points[i, 0] = objectpoints[i][0]
+        o_points[i, 1] = objectpoints[i][0]   
+        o_points[i, 2] = objectpoints[i][0]
+        i_points[i, 0] = cubic[i][0]
+        i_points[i, 1] = cubic[i][1]
     
     
+    rvec = cv.CreateMat(1, 3, cv.CV_32FC1)
+    tvec = cv.CreateMat(1, 3, cv.CV_32FC1)
+    cv.FindExtrinsicCameraParams2(o_points, i_points, intrinsic_matrix, distortion, rvec, tvec, useExtrinsicGuess=0)
+    
+    rotation = cv.CreateMat(3, 3, cv.CV_32FC1)
+    translation = cv.CreateMat(3, 3, cv.CV_32FC1)
+    cv.Rodrigues2(rvec, rotation)
+    cv.Rodrigues2(tvec, translation)
+    
+    matrix = cv.CloneMat(rotation)
+    for i in xrange(3):
+       print matrix[i,0],"\t\t", matrix[i,1],"\t\t", matrix[i,2]
+       
+    rgb_cv = frame_convert.video_cv(rgb)
+    dst = cv.CloneImage(rgb_cv)
+    
+    rvec_rgb = cv.CreateMat(2, 3, cv.CV_32FC1)
+    
+    for i in xrange(2):
+        rvec_rgb[i,0] = rotation[i + 1,0] 
+        rvec_rgb[i,1] = rotation[i + 1,1]
+        rvec_rgb[i,2] = rotation[i + 1,2]
+        
+        
+    cv.WarpAffine(rgb_cv, dst, rvec_rgb)
+    
+    cv.SaveImage("original.png", rgb_cv)
+    cv.SaveImage("warped.png", dst)    
+    
+        
+    print "New points"
     
 
 
@@ -256,15 +303,27 @@ def mouseclick(event,x,y,flags,param):
         cubic = []
 
 def generate_modelpoints(i_c, argv):
-    if i_c == None:
+    if i_c == None and not (len(sys.argv) == 4 and sys.argv[3] == '1'):
         print "Error: The intrinsic matrix hasn't been calculated yet, please do that before you continue"
         return None
         
-    print "Press esc to stop"
-    global intrinsic_matrix, distortion
-    intrinsic_matrix = i_c[0]
-    distortion = i_c[1]
 
+    global intrinsic_matrix, distortion, fake
+    
+    if len(sys.argv) == 4 and sys.argv[3] == '1':
+        try:
+            intrinsic_matrix = cv.Load("Camera_matrix.xml")
+            distortion = cv.Load("Distortion.xml")         
+        except: 
+            print "Error: The intrinsic matrix hasn't been calculated yet, please do that before you continue"
+            return None
+    else:
+        intrinsic_matrix = i_c[0]
+        distortion = i_c[1]
+
+
+
+    print "Press esc to stop"
     cv.NamedWindow('Depth')
     cv.NamedWindow('RGB')
     cv.SetMouseCallback("RGB",mouseclick,None)
@@ -273,6 +332,7 @@ def generate_modelpoints(i_c, argv):
         depth_im = np.load("Depth.npy")
         if argv[1] == "1":
             fake = True
+
         while(1):
             try:
                 display_depth(None,depth_im,None)
@@ -293,10 +353,17 @@ def generate_modelpoints(i_c, argv):
 
 
 if __name__ == '__main__':
+
     cv.NamedWindow('Depth')
     cv.NamedWindow('RGB')
     cv.SetMouseCallback("RGB",mouseclick,None)
     print "Press esc to stop"    
+    
+    if len(sys.argv) == 4 and sys.argv[3] == '1':
+        intrinsic_matrix = cv.Load("Camera_matrix.xml")
+        distortion = cv.Load("Distortion.xml")     
+    
+    
     if len(sys.argv) > 1 :
         rgb_im = np.load("RGB.npy")
         depth_im = np.load("Depth.npy")

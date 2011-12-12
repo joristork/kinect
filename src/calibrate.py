@@ -97,7 +97,7 @@ def get_intrinsic_matrix(argv):
         
         
         o_points = cv.CreateMat(number_of_points * shots, 3, cv.CV_32FC1)
-        i_points = cv.CreateMat(number_of_points * shots, 3, cv.CV_32FC1)
+        i_points = cv.CreateMat(number_of_points * shots, 2, cv.CV_32FC1)
         j = -1
         for i in xrange(number_of_points * shots):
             if i % cb_dim[1] == 0: 
@@ -134,6 +134,16 @@ def get_intrinsic_matrix(argv):
                 
         cv.DestroyAllWindows() 
         print "\nInfo: Intrinsic matrix and distortion coefficients have been set."
+        
+        if len(argv) == 4 and argv[3] == "2":
+            cv.Save("Camera_matrix.xml",camera_matrix)
+            cv.Save("Distortion.xml",distortion)
+        
+        for i in xrange(shots):
+          print tvecs[i,0], tvecs[i,1], tvecs[i,2]
+        
+        
+        
         return camera_matrix, distortion
     else:
         print "\nInfo: No points have been set and so we didn't find an intrinsic matrix."
