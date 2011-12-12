@@ -24,9 +24,9 @@ This module combines all functions. It can be called with:
     
 ./Kinect.py * A
     The value of A specifies the index of the camera that is to be used for
-    calibration. If -1 is passed, the program chooses itself. If two camera's
-    are attached (e.g. a camera in your laptop and the Kinect) they likely have 
-    the indexes 0 and 1.
+    calibration. If -1 or no 2nd argument is passed, the program chooses itself. 
+    If two camera's are attached (e.g. a camera in your laptop and the Kinect) 
+    they likely have the indexes 0 and 1.
     
 ./Kinect * A 1
     The programs has a module that calculates the intrinsic camera matrix. This
