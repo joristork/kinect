@@ -10,7 +10,7 @@ quit = False
 current_points = []
 accept = False
 
-def get_intrinsic_matrix():
+def get_intrinsic_matrix(argv):
     """Note that we ensure ``choice'' is not interpreted as a string"""
     global enable_capture, quit, current_points, captured_points, accept
     enable_capture = False
@@ -20,6 +20,17 @@ def get_intrinsic_matrix():
     current_points = []
     accept = False    
     
+    camera = -1
+    if len(argv) > 2:
+        try:
+            camera = int(argv[2])
+        except exceptions.ValueError:
+            print "\nError: A invalid argument has been passed. The second argument is ignored\n"    
+    cam = cv.CaptureFromCAM(camera);
+    if cv.QueryFrame(cam) == None:
+        print "\nError: You selected a invalid camera, return to main menu\n"
+        return None    
+    
     cb_dim = get_cb_dimensions()
 
     
@@ -27,7 +38,8 @@ def get_intrinsic_matrix():
     if cb_dim == None:
        return None
 
-    cam = cv.CaptureFromCAM(-1);
+
+
     cv.NamedWindow('Calibrate')
     cv.SetMouseCallback("Calibrate",mouseclick,None)
     font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5, 0, 1, 8)
@@ -36,6 +48,7 @@ def get_intrinsic_matrix():
     while True:
         image = cv.QueryFrame(cam)
         image_size = cv.GetSize(image)
+        
         
         grey_image = cv.CreateImage(image_size, cv.IPL_DEPTH_8U, 1 ) 
         cv.CvtColor(image,grey_image,cv.CV_BGR2GRAY)
@@ -123,6 +136,7 @@ def get_intrinsic_matrix():
         print "\nInfo: Intrinsic matrix and distortion coefficients have been set."
         return camera_matrix, distortion
     else:
+        print "\nInfo: No points have been set and so we didn't find an intrinsic matrix."
         return None
 
 def mouseclick_dist(event,x,y,flags,param):
@@ -163,6 +177,27 @@ def get_cb_dimensions():
         if inp == "":
             return get_cb_dimensions()
     return None
+    
+def set_camera(argv):
+    camera = raw_input('\nCamera index:\n>> ')
+    
+    try:
+        c = int(camera)
+        if len(argv) == 1:
+            argv = argv + ["0",camera]
+        elif len(argv) == 2:
+            argv = argv + [camera]
+        elif len(argv) > 2:
+            argv[2] = camera
+        return argv
+    except exceptions.ValueError:
+        print "You entered an invalid value. Please press enter to try again or press 'x' and enter to go back to the main menu."
+        inp = raw_input(">> ")
+        while(inp != "x" and inp != ""):
+            inp = raw_input(">> ")
+        if inp == "":
+            return set_camera(argv)
+    return None       
     
 if __name__ == '__main__':
     matrix, distortion =  get_intrinsic_matrix()

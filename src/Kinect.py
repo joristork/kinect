@@ -17,7 +17,8 @@ def menu(argv):
         print '\n --- MAIN MENU ---'
         print '\n [1] Calibrate the camera'
         print '\n [2] Start making a 3d model'
-        print '\n [3] Exit'        
+        print '\n [3] Select another camera'        
+        print '\n [4] Exit'        
         choice = 0
         choice = raw_input('\nChoose one:\n>> ')
         router(choice, fails, i_c, points, argv)
@@ -26,13 +27,18 @@ def menu(argv):
         """ Executes the desired choice, if it is valid """
         if choice == '1':
             print "\nStart to calibrate the camera\n" 
-            i_c = calib.get_intrinsic_matrix()
+            i_c = calib.get_intrinsic_matrix(argv)
             prompt(0,i_c, points, argv)
         elif choice == '2':
-            print "\nStart generating modelpoints\n"
+            print "Start generating modelpoints\n"
             points = cm.generate_modelpoints(i_c, argv)
             prompt(0,i_c, points, argv)
         elif choice == '3':
+            print "\nPlease enter the index of the camera you want to use."
+            argv = calib.set_camera(argv)
+            prompt(0,i_c, points, argv)            
+            
+        elif choice == '4':
             print '\nGoodbye!\n'
             sys.exit(0)
         else:
@@ -48,7 +54,7 @@ def menu(argv):
         prompt(fails, i_c, points, argv)
     prompt(fails, i_c, points, argv)
 
-
+ 
 
 if __name__ == '__main__':
     menu(sys.argv)

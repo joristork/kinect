@@ -6,8 +6,6 @@ import numpy as np
 import sys
 
 
-cv.NamedWindow('Depth')
-cv.NamedWindow('RGB')
 points = []
 keep_running = True
 capture = False # Not necessery, but defined for clearity 
@@ -17,29 +15,32 @@ depth_np = None
 rgb_np = None
 cubic = []
 
+intrinsic_matrix = None
+distortion = None
+
 def displaypoints(im, points):
     """ Display points in a given images, used for rgb and depth """
     if len(points) >= 1:
         cv.Circle(im,points[0],4,(0,255,0),-1)
         if len(points) >= 2:
             cv.Circle(im,points[1],4,(255,0,0),-1)
-            cv.Line(im,points[0],points[1],(0,0,0),2)
+            cv.Line(im,points[0],points[1],(255,0,0))
         if len(points) >= 3:
             cv.Circle(im,points[2],4,(0,0,255),-1)
             cv.Line(im,points[1],points[2],(255,0,0))
         if len(points) >= 4:
             cv.Circle(im,points[3],4,(0,0,0),-1)
             cv.Line(im,points[2],points[3],(255,0,0))
-            cv.Line(im,points[3],points[0],(0,0,0),2)
+            cv.Line(im,points[3],points[0],(255,0,0))
         if len(points) == 8:
             cv.Circle(im,points[4],4,(0,255,0),-1)
             cv.Circle(im,points[5],4,(255,0,0),-1)
             cv.Circle(im,points[6],4,(0,0,255),-1)
             cv.Circle(im,points[7],4,(0,0,0),-1)
-            cv.Line(im,points[4],points[5],(255,0,0))
+            cv.Line(im,points[4],points[5],(0,0,0),2)
             cv.Line(im,points[5],points[6],(255,0,0))
             cv.Line(im,points[6],points[7],(255,0,0))
-            cv.Line(im,points[7],points[4],(255,0,0))
+            cv.Line(im,points[7],points[4],(0,0,0),2)
 
             cv.Line(im,points[4],points[0],(0,0,0),2)
             cv.Line(im,points[5],points[1],(255,0,0))
@@ -76,12 +77,9 @@ def print_instructions(im):
         cv.Circle(im,(32,90),3,(0,0,0),-1)
         cv.Circle(im,(32,60),3,(0,0,0),-1)
         cv.Circle(im,(12,60),4,(0,0,0),-1)
-    elif len(points) <= 8:
+    elif len(points) == 8:
         if capture:
             cv.PutText(im,"Use right-click to finalize the capture",(2, 20), font, (0,0,0))
-            
-    elif len(points) > 8:
-        pass
     else:
         cv.PutText(im,"Please right-click on the green corner to begin the capture",(2, 20), font, (0,0,0))
         print_square(im) 
@@ -154,9 +152,10 @@ def display_depth(dev, data, timestamp):
     """        
     depth_np = choose_data(data, depth_np, capture, True, points, 'Depth')
     
-    if cv.WaitKey(10) == 27:
-        keep_running = False
-
+    key = ( cv.WaitKey(10) ) % 0x100
+    if key == 27:
+        raise freenect.Kill
+        
 def display_rgb(dev, data, timestamp):
     """
     Handler for the Kinect. This functions is responible for all data displayed 
@@ -165,8 +164,10 @@ def display_rgb(dev, data, timestamp):
     global keep_running, rgb_np, points, capture
     rgb_np = choose_data(data, rgb_np, capture, False, points, 'RGB')
     
-    if cv.WaitKey(10) == 27:
-        keep_running = False
+
+    key = ( cv.WaitKey(10) ) % 0x100
+    if key == 27:
+        raise freenect.Kill
 
 
 def body(*args):
@@ -177,9 +178,9 @@ def body(*args):
     """
     if not keep_running:
         raise freenect.Kill
-    if not capture and depth_np and rgb_np:
-        print 
 
+def isNaN(num):
+    return num != num
 
 def make_cubicle(depth):
     """
@@ -190,15 +191,22 @@ def make_cubicle(depth):
     global points, cubic
     # Height of cubicle
     height = 200
-    points_3d = []
-    for p in points:
-        points_3d.append(np.array([p[0],p[1],depth[p[1]][p[0]]], dtype=float))
+    for (i,p) in enumerate(points):
+        cubic.append(np.array([p[0],p[1],depth[p[1]][p[0]]], dtype=float))
+        if depth[p[1]][p[0]] > 2000:
+            print "Point no. ", i, " is probably in a blind spot. Please start over."
+        
         
     for i in xrange(4):
-        cubic.append(np.cross((points_3d[((i + 1) % 4)] - points_3d[i]),(points_3d[((i + 3) % 4)] - points_3d[i])))
-        cubic[i] = cubic[i] / np.linalg.norm(cubic[i]) 
-        cubic[i] = (cubic[i] * height) + points_3d[i]
-        points.append((int(cubic[i][0]),int(cubic[i][1])))
+        cubic.append(np.cross((cubic[((i + 1) % 4)] - cubic[i]),(cubic[((i + 3) % 4)] - cubic[i])))
+        cubic[i + 4] = cubic[i + 4] / np.linalg.norm(cubic[i + 4]) 
+        cubic[i + 4] = (cubic[i + 4] * height) + cubic[i]
+        
+        if not isNaN(cubic[i + 4][0]) and not isNaN(cubic[i + 4][1]):
+            points.append((int(cubic[i + 4][0]),int(cubic[i + 4][1])))     
+        
+        
+    
 
 
 def handle_new_capture(depth, rgb):
@@ -209,7 +217,15 @@ def handle_new_capture(depth, rgb):
     """
     print "New data captured"
     global cubic
-        
+    for (i,cub) in enumerate(cubic):
+        print i, cub - cubic [4]
+    
+    objectpoints = [(0,100,0),(100,100,0),(100,100,200),(0,100,200)]
+    imagepoints = [(cubic[0][0],cubic[0][1]),(cubic[1][0],cubic[1][1]),(cubic[2][0],cubic[2][1]),(cubic[3][0],cubic[3][1])]
+    
+    
+    
+
 
 def mouseclick(event,x,y,flags,param):
     """
@@ -223,7 +239,10 @@ def mouseclick(event,x,y,flags,param):
         if fake:
             points = [(215, 300), (495, 328), (468, 199), (299, 187)]
         else:
-            points.append((x,y))
+            if not (x,y) in points:
+                points.append((x,y))
+            else:
+                print "Warning: two points may not be in the same place"
             
     elif len(points) >= 4 and event == cv.CV_EVENT_LBUTTONUP and capture:
         handle_new_capture(depth_np, rgb_np)
@@ -234,19 +253,68 @@ def mouseclick(event,x,y,flags,param):
         capture = False
         depth_np = None
         rgb_np = None         
-        cubic = []   
+        cubic = []
+
+def generate_modelpoints(i_c, argv):
+    if i_c == None:
+        print "Error: The intrinsic matrix hasn't been calculated yet, please do that before you continue"
+        return None
+        
+    print "Press esc to stop"
+    global intrinsic_matrix, distortion
+    intrinsic_matrix = i_c[0]
+    distortion = i_c[1]
+
+    cv.NamedWindow('Depth')
+    cv.NamedWindow('RGB')
+    cv.SetMouseCallback("RGB",mouseclick,None)
+    if len(argv) > 1 and argv[1] != "0":
+        rgb_im = np.load("RGB.npy")
+        depth_im = np.load("Depth.npy")
+        if argv[1] == "1":
+            fake = True
+        while(1):
+            try:
+                display_depth(None,depth_im,None)
+                display_rgb(None,rgb_im,None)
+            except freenect.Kill:
+                print "\nInfo: Done gathering points"
+                break
+        cv.DestroyAllWindows()
+    else: 
+        try:
+            freenect.runloop(depth=display_depth,
+                         video=display_rgb,
+                         body=body)
+        except freenect.Kill:
+                print "\nInfo: Done gathering points"
+        cv.DestroyAllWindows()
+    return None
+
 
 if __name__ == '__main__':
+    cv.NamedWindow('Depth')
+    cv.NamedWindow('RGB')
     cv.SetMouseCallback("RGB",mouseclick,None)
-    if len(sys.argv) > 1:
+    print "Press esc to stop"    
+    if len(sys.argv) > 1 :
         rgb_im = np.load("RGB.npy")
         depth_im = np.load("Depth.npy")
         if sys.argv[1] == "1":
             fake = True
         while(1):
-            display_depth(None,depth_im,None)
-            display_rgb(None,rgb_im,None)
+            try:
+                display_depth(None,depth_im,None)
+                display_rgb(None,rgb_im,None)
+            except freenect.Kill:
+                print "Exit the program"
+                break
+        cv.DestroyAllWindows()
     else: 
-        freenect.runloop(depth=display_depth,
+        try:
+            freenect.runloop(depth=display_depth,
                          video=display_rgb,
                          body=body)
+        except freenect.Kill:
+            print "Exit the program"
+        cv.DestroyAllWindows()
