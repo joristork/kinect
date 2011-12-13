@@ -75,33 +75,58 @@ in 16-bit little endian PCM samples (16KHz).\cite{FREENECT}\\
 
 The low-level interface includes the option for depth smoothing.
 
+
 \section{Theory: How it works}
 \label{howitworks}
 
-kinect measures depth using a proprietary extension of the standard computer
-vision process known as stereo triangulation. in this section we describe the
-depth measurement implementation from a relatively high level, computer vision
-perspective. These descriptions are based on our interpretation of the 
+Our assessment is that the kinect measures depth using a proprietary extension
+of the standard computer vision process known as stereo triangulation. In this
+section we describe the depth measurement implementation in relatively high
+level terms, from the perspective of theoretical computer vision. These
+descriptions are based on our interpretation of public records, including
+patents and casual articles. We also refer, though to a lesser extent, to our
+own experiments with the Kinect.
+
 
 \subsection{Stereo triangulation}
+
+
+% this figure taken from an example by Till Tantau
+% 
+\begin{figure}
+    \begin{center}
+        \input{tikz_figures/triangulation}
+        \caption{``Standard'' stereo triangulation}
+        \label{fig:triang}
+    \end{center}
+\end{figure}
 
 the depth mapping mechanism employs triangulation
 cf slides
 
+
 \subsection{Stereo triangulation with projected dot pattern}
+
+% place figure for active stereo triangulation
 
 in the kinect a corresponds to a' etc
 cf slides
+
 
 \subsubsection{Experiment: pattern variation over distance}
 
 describe experiment with pictures... 
 
+
 \section{Precision of the intrument}
 \label{precision}
 
+
+In this section we describe the Kinect's characteristics as a depth measurement
+tool, and notably the precision of the measurements.
+
+
 \subsection{Depth precision}
-depth precision
 
 \subsubsection{Sources of error}
 

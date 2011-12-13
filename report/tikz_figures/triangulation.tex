@@ -1,0 +1,48 @@
+\begin{tikzpicture}[scale=0.75,cap=round]
+
+    \def\xcl{-12}
+    \def\xcr{-3}
+    \def\yimageplanes{1}
+    \def\imageplaneshalfwidth{1.5}
+
+    % Styles
+    \tikzstyle{axes}=[]
+
+    \begin{scope}[style=axes]
+    \draw[->] (0,0) -- (-15,0) node[below] {$x$};
+    \draw[->] (0,0) -- (0,10) node[above] {$z$};
+    \draw[->] (0,0) -- (0.5,-0.625) node[below] {$y$};
+
+    \end{scope}
+
+    % point on object
+    \draw [fill] (-6.5,9) circle [radius=0.025];
+    \draw node [above right] at (-6.5,9) {$p$};
+
+    % left camera
+    \draw [fill] (-12,0) circle [radius=0.025];
+    \draw node [below left] at (\xcl,0) {$c_{l}$};
+    \draw[-] (\xcl - \imageplaneshalfwidth,\yimageplanes) -- (\xcl + \imageplaneshalfwidth, \yimageplanes);
+
+    % right camera
+    \draw [fill] (-3,0) circle [radius=0.025];
+    \draw node [below right] at (\xcr,0) {$c_{r}$};
+    \draw[-] (\xcr - \imageplaneshalfwidth,\yimageplanes) -- (\xcr + \imageplaneshalfwidth, \yimageplanes);
+
+    % depth plane
+    %
+    % image rays
+    %
+    % focal length
+    %
+    % depth
+    %
+    % camera distance
+    %
+    % left image normal offset
+    %
+    % right image normal offset
+    %
+    % inter-offset distance
+
+\end{tikzpicture}
