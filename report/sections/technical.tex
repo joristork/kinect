@@ -17,12 +17,6 @@ the Xbox 360.
 
 %describe reverse engineering, drivers, and api's in this section?
 %
-%nb: patents vs patent applications (the latter: garcia:2008)
-%
-%nb: method and system for object reconstruction, depth ranging with moire
-%patterns; optical designs for zero order reconstruction; not saved or printed
-%out yet
-%
 %common applications in this section?
 
 \subsection{Specifications}
@@ -84,18 +78,24 @@ The low-level interface includes the option for depth smoothing.
 \section{Theory: How it works}
 \label{howitworks}
 
-tell it how it is with foot/endnotes:
+kinect measures depth using a proprietary extension of the standard computer
+vision process known as stereo triangulation. in this section we describe the
+depth measurement implementation from a relatively high level, computer vision
+perspective. These descriptions are based on our interpretation of the 
 
 \subsection{Stereo triangulation}
 
-the depth mapping employs triangulation
-
-triangulation is...
+the depth mapping mechanism employs triangulation
+cf slides
 
 \subsection{Stereo triangulation with projected dot pattern}
 
 in the kinect a corresponds to a' etc
+cf slides
 
+\subsubsection{Experiment: pattern variation over distance}
+
+describe experiment with pictures... 
 
 \section{Precision of the intrument}
 \label{precision}
