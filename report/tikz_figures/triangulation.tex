@@ -2,47 +2,91 @@
 
     \def\xcl{-12}
     \def\xcr{-3}
-    \def\yimageplanes{1}
+    \def\yimageplanes{1.75}
     \def\imageplaneshalfwidth{1.5}
+    \def\xdistoffsetf{\imageplaneshalfwidth  + 0.5}
+    \def\xdistoffsetZp{\imageplaneshalfwidth  - 0.25}
+    \def\ydistoffsetxl{\yimageplanes + 0.125}
+    \def\ydistoffsetxr{\ydistoffsetxl}
+    \def\ydistoffsetb{0}
+    \def\ydistoffsetinterx{\ydistoffsetb}
+    \def\xobject{-6.5}
+    \def\objectdepth{9}
 
     % Styles
     \tikzstyle{axes}=[]
 
     \begin{scope}[style=axes]
-    \draw[->] (0,0) -- (-15,0) node[below] {$x$};
-    \draw[->] (0,0) -- (0,10) node[above] {$z$};
-    \draw[->] (0,0) -- (0.5,-0.625) node[below] {$y$};
+    \draw[->, thick] (0,0) -- (-15,0) node (xaxis) [below] {$x$};
+    \draw[->, thick] (0,0) -- (0,10) node (zaxis) [above] {$z$};
+    \draw[->, very thick] (0,0) -- (0.5,-0.625) node[below] {$y$};
 
     \end{scope}
 
     % point on object
-    \draw [fill] (-6.5,9) circle [radius=0.025];
-    \draw node [above right] at (-6.5,9) {$p$};
+    \draw [fill, red] (-6.5,9) circle [radius=0.05];
+    \draw node [above right] at (-6.5,\objectdepth) {$p$};
 
     % left camera
-    \draw [fill] (-12,0) circle [radius=0.025];
+    \draw [fill, blue] (-12,0) circle [radius=0.05];
     \draw node [below left] at (\xcl,0) {$c_{l}$};
-    \draw[-] (\xcl - \imageplaneshalfwidth,\yimageplanes) -- (\xcl + \imageplaneshalfwidth, \yimageplanes);
+    % left image plane
+    \draw[-, thick] (\xcl - \imageplaneshalfwidth,\yimageplanes) coordinate (ipl1)-- (\xcl + \imageplaneshalfwidth, \yimageplanes) coordinate (ipl2);
 
     % right camera
-    \draw [fill] (-3,0) circle [radius=0.025];
+    \draw [fill, blue] (-3,0) circle [radius=0.05];
     \draw node [below right] at (\xcr,0) {$c_{r}$};
-    \draw[-] (\xcr - \imageplaneshalfwidth,\yimageplanes) -- (\xcr + \imageplaneshalfwidth, \yimageplanes);
+    % right image plane
+    \draw[-, thick] (\xcr - \imageplaneshalfwidth,\yimageplanes) coordinate (ipr1)-- (\xcr + \imageplaneshalfwidth, \yimageplanes) coordinate (ipr2);
 
     % depth plane
-    %
+    \draw[dashed, domain=-16:3] plot (\x, {\objectdepth});
+
     % image rays
-    %
+    \draw[dotted] (\xobject,\objectdepth) coordinate (rayl1)-- (\xcl,0) coordinate (rayl2);
+    \draw[dotted] (\xobject,\objectdepth) coordinate (rayr1)-- (\xcr,0) coordinate (rayr2);
+
+    % image points
+    \coordinate (pixell) at (intersection of ipl1--ipl2 and rayl1--rayl2);
+    \draw[fill, orange] (pixell) circle [radius=0.05];
+    \coordinate (pixelr) at (intersection of ipr1--ipr2 and rayr1--rayr2);
+    \draw[fill, orange] (pixelr) circle [radius=0.05];
+
     % focal length
-    %
+    \draw[<->, thick, gray] (\xcl - \xdistoffsetf,0) -- (\xcl - \xdistoffsetf,\yimageplanes);
+    \draw node [left, gray] at (\xcl - \xdistoffsetf,\yimageplanes /2) {$f$};
+    
+    % Camera norms
+    % left
+    \draw[->] (\xcl,0) coordinate (cl) -- (\xcl,\objectdepth + 1) coordinate (lnormaldepthisect);
+    % perpendicular symbol
+    \draw[thick] (\xcl,0.15) -| (\xcl-0.15, 0); 
+    % right
+    \draw[->] (\xcr,0) coordinate (cr) -- (\xcr,\objectdepth + 1) coordinate (rnormaldepthisect);
+    % perpendicular symbol
+    \draw[thick] (\xcr,0.15) -| (\xcr +0.15, 0); 
+    %(\xcr,0)
+    
     % depth
-    %
+    \draw[<->, thick, gray] (\xcl - \xdistoffsetZp, 0) -- (\xcl - \xdistoffsetZp, \objectdepth);
+    \draw node [below left, gray] at (\xcl - \xdistoffsetZp,{\objectdepth / 2}) {$Z_{p}$};
+    
     % camera distance
-    %
+    \draw[<->, very thick, gray] (\xcl,\ydistoffsetb) -- (\xcr,\ydistoffsetb);
+    \draw node [below, gray] at (-7.5, \ydistoffsetb) {$b$};
+    
     % left image normal offset
-    %
+    \coordinate (limageplanecentre) at (intersection of ipl1--ipl2 and cl--lnormaldepthisect);
+    \draw[<->, thick, gray] (limageplanecentre) -- (pixell);
+    \draw node [above right, gray] at (limageplanecentre) {$x_{l}$};
+    
     % right image normal offset
-    %
-    % inter-offset distance
+    \coordinate (rimageplanecentre) at (intersection of ipr1--ipr2 and cr--rnormaldepthisect);
+    \draw[<->, thick, gray] (rimageplanecentre) -- (pixelr);
+    \draw node [above left, gray] at (rimageplanecentre) {$x_{r}$};
+    
+    % inter-pixel distance
+    \draw[<->, thick, gray] (pixell) -- (pixelr);
+    \draw node [below, gray] at (-7.5, \ydistoffsetxr) {$b-(x_{l}+x_{r})$};
 
 \end{tikzpicture}
