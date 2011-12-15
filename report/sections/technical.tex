@@ -26,18 +26,18 @@ comprise the Kinect's sensor array.
 
 %nb: REF means reference to be included
 %
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{l p{10cm}}
 \toprule
 Component & Description \\
 \midrule
 
-RGB Camera & Sensor ``very similar'' to Micron mt9v112 (1/6" VGA CMOS) but
-``larger'' and with some differing registers. Bayer colour pattern (RG,GB).
-640x480 pixels, 8-bit at 30Hz.  1280x1024 pixels at 10Hz if using OpenNI backend
-, though this is referred to as ``15Hz'' in low level protocol. UYVY colour
-format also possible at ``15Hz'' framerate.\cite{FREENECT}\cite{RGBDEMO} \\
+RGB Camera & Sensor ``very similar'' to Mi\-cron mt9v112 (1/6" VGA CMOS) but
+``larger'' and with some di\-ffering reg\-isters. Bay\-er co\-lour pa\-ttern (RG,GB).
+640x\-480 pixels, 8-bit at 30 Hz.  1280x\-1024 pixels at 10\-Hz if using Open\-NI backend
+, though this is referred to as ``15Hz'' in low level pro\-tocol. UYVY co\-lour
+for\-mat also possible at ``15 Hz'' framerate.\cite{FREENECT}\cite{RGBDEMO} \\
 
 Infrared camera & Monochrome CMOS sensor (no reliable source for this). Three
 options for pixel size: ``small'' (unspecified); 640x480; 1280x1024. Framerate
@@ -73,8 +73,6 @@ in 16-bit little endian PCM samples (16KHz).\cite{FREENECT}\\
 \label{tab:specs}
 \end{table}
 
-The low-level interface includes the option for depth smoothing.
-
 
 \section{Theory: How it works}
 \label{howitworks}
@@ -90,19 +88,30 @@ own experiments with the Kinect.
 
 \subsection{Stereo triangulation}
 
+Figure \ref{fig:triang} shows the idealised configuration of two cameras,
+$c_{l}$ and $c_{r}$, set up as a stereo unit, and a point, $p$, on an object
+viewed by both cameras.  In this model, we simplify: 
 
-% this figure taken from an example by Till Tantau
-% 
-\begin{figure}
+\begin{itemize}
+
+    \item   the sensors as pinhole cameras;
+
+    \item   the stereo set-up so that the image planes of the two cameras
+            (represented here for convenience' sake as positioned in front of
+            the focal points) are coincident;
+
+    \item   
+
+
+\end{itemize}
+
+\begin{figure}[ht]
     \begin{center}
         \input{tikz_figures/triangulation}
         \caption{``Standard'' stereo triangulation}
         \label{fig:triang}
     \end{center}
 \end{figure}
-
-the depth mapping mechanism employs triangulation
-cf slides
 
 
 \subsection{Stereo triangulation with projected dot pattern}
