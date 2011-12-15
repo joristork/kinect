@@ -18,7 +18,7 @@ def showrgb():
     cv.ShowImage("Calibrate", rgb)
 
 def addpoint(im, point, point_list):
-    cv.Circle(im, point, 4, (0, 140, 0), -1)
+    cv.Circle(im, point, 4, (140, 0, 0), -1)
     point_list.append(point)
 
 def calibrate():
@@ -107,8 +107,10 @@ def display_rgb(dev, data, timestamp):
     if keep_running:
         if using_depth:
             cvdata = frame_convert.video_cv(data[:160,:213])
-            resized = cv.CreateImage((640, 480), cv.IPL_DEPTH_8U, 3)
-            cv.Resize(cvdata, resized)
+            gray = cv.CreateImage((213, 160), cv.IPL_DEPTH_8U, 1)
+            cv.CvtColor(cvdata, gray, cv.CV_BGR2GRAY)
+            resized = cv.CreateImage((640, 480), cv.IPL_DEPTH_8U, 1)
+            cv.Resize(gray, resized)
             rgb = resized
         else:
             rgb = frame_convert.video_cv(data)
