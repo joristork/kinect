@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<depth_cm type_id="opencv-matrix">
+  <rows>3</rows>
+  <cols>3</cols>
+  <dt>d</dt>
+  <data>
+    5.9421480358642339e+02 0. 3.3930546187516956e+02 0.
+       5.9104092248505947e+02 2.4273843891390746e+02 0. 0. 1.</data></depth_cm>
+</opencv_storage>
