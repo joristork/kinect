@@ -31,7 +31,7 @@ def rectify_depth(depth):
     cv.Remap(depth, r, depth_mapx, depth_mapy)
     return r
 
-def depth_to_meters(d):
+def depth_to_centimeters(d):
     """
     The Kinect depth sensor uses some sort of logarithmic scale. To get it on a
     linear scale, the following formula can be used. (Proposed by Dr. Stephane
@@ -43,11 +43,11 @@ def depth_to_meters(d):
     """
 
     if d < 2047:
-        return 0.1236 * tan(d / 2842.5 + 1.1863)
+        return 12.36 * tan(d / 2842.5 + 1.1863)
     else:
         return -1.0
 
-def depth_image_to_meters(depth):
+def depth_image_to_centimeters(depth):
     """
     Convert the entire RECTIFIED depth image to linear scale.
     
@@ -58,7 +58,7 @@ def depth_image_to_meters(depth):
     r = cv.CreateImage((depth.width, depth.height), cv.IPL_DEPTH_8U, 1)
     for y in xrange(depth.height):
         for x in xrange(depth.width):
-            r[y, x] = 100 * depth_to_meters(depth[y, x])
+            r[y, x] = depth_to_centimeters(depth[y, x])
 
     return r
 
