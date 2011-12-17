@@ -245,7 +245,11 @@ def main(argv=[]):
     
     note = "Found the camera matrices. Press any key to exit."
     showrgb()
-    cv.WaitKey(0)
+    
+    while True:
+        key = cv.WaitKey(10)
+        if key >= 0 and key < 255:
+            break
 
 if __name__ == "__main__":
     main(sys.argv)
