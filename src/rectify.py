@@ -1,35 +1,121 @@
+#!/usr/bin/env python
+#
+# Image Processing - Final project - Kinect
+#
+# Group Kinect 1:
+# - J. Stork
+# - L. Swartsenburg
+# - S. van Veen
+# - B. Weelinck
+# - J. van der Woning
+# - J. Zuiddam
+#
+# Author: J. van der Woning
+# Date: December 12, 2011
+#
+# TODO: Use our own matrices instead of those found by Nicolas Burrus (see also
+#       stereo_calibrate_auto.py).
+
+"""
+Rectification functions for aligning Microsoft Kinect's depth with its color
+image. It uses the camera matrices which can be estimated by 
+stereo_calibrate_auto.py.
+"""
+
 import cv
 from math import tan
 
-rgb_mapx = cv.Load("matrices/nicolas_burrus/rgb_mapx.xml")
-rgb_mapy = cv.Load("matrices/nicolas_burrus/rgb_mapy.xml")
-depth_mapx = cv.Load("matrices/nicolas_burrus/depth_mapx.xml")
-depth_mapy = cv.Load("matrices/nicolas_burrus/depth_mapy.xml")
+# Initialize all at None
+rgb_mapx = rgb_mapy = rgb_h = depth_mapx = depth_mapy = depth_h = None
 
-def rectify_rgb(rgb):
+
+def load_rectification_matrices(homographic=False):
+    """
+    Load the recitfication matrices
+    
+    Input: optional bool homographic, when True, load the homographic matrices
+    Output: none
+    """
+    
+    global rgb_mapx, rgb_mapy, depth_mapx, depth_mapy
+
+    rgb_mapx = cv.Load("matrices/nicolas_burrus/rgb_mapx.xml")
+    rgb_mapy = cv.Load("matrices/nicolas_burrus/rgb_mapy.xml")
+
+    depth_mapx = cv.Load("matrices/nicolas_burrus/depth_mapx.xml")
+    depth_mapy = cv.Load("matrices/nicolas_burrus/depth_mapy.xml")
+    
+    if homographic:
+        load_homographic_matrices()
+
+
+def load_homographic_matrices():
+    """
+    Load the homographic matrices
+    
+    Input: none
+    Output: none
+    """
+
+    global rgb_h, depth_h
+
+    rgb_h = cv.Load("matrices/nicolas_burrus/rgb_h.xml")
+    depth_h = cv.Load("matrices/nicolas_burrus/depth_h.xml")
+
+
+def rectify_rgb(rgb, align=False):
     """
     Rectify the Kinect color image according to the matrices found by
     calibrating.
     
     Input: raw IplImage rgb from the Kinect
-    Output: rectified IplImage r
+           optional bool align, when True, align the image to the depth image
+    Output: either the rectified IplImage r or the rectified aligned IplImage a
     """
+    global rgb_mapx, rgb_mapy, rgb_h
+    
+    if not rgb_mapx:
+        load_rectification_matrices()
     
     r = cv.CloneImage(rgb)
     cv.Remap(rgb, r, rgb_mapx, rgb_mapy)
+    
+    if align:
+        if not rgb_h:
+            load_homographic_matrices()
+        a = cv.CloneImage(r)
+        cv.WarpPerspective(r, a, rgb_h)
+        return a
+
     return r
 
-def rectify_depth(depth):
+
+def rectify_depth(depth, align=True):
     """
     Rectify the Kinect depth image according to the matrices found by
     calibrating.
     
     Input: raw IplImage depth from the Kinect
-    Output: rectified IplImage r
+           optional bool align, when True, align the image to the rgb image
+    Output: either the rectified IplImage r or the rectified aligned IplImage a
     """
+    global depth_mapx, depth_mapy, depth_h
+    
+    if not depth_mapx:
+        load_rectification_matrices()
+    
     r = cv.CloneImage(depth)
     cv.Remap(depth, r, depth_mapx, depth_mapy)
+    
+    if align:
+        if not depth_h:
+            load_homographic_matrices()
+        a = cv.CloneImage(r)
+        cv.WarpPerspective(r, a, depth_h)
+        return a
+
     return r
+
 
 def depth_to_centimeters(d):
     """
@@ -47,6 +133,7 @@ def depth_to_centimeters(d):
     else:
         return -1.0
 
+
 def depth_image_to_centimeters(depth):
     """
     Convert the entire RECTIFIED depth image to linear scale.
@@ -62,9 +149,11 @@ def depth_image_to_centimeters(depth):
 
     return r
 
+
 def get_depth_from_rgb(x, y, depth):
     """
-    Get the depth from a position in the RECTIFIED color image.
+    Get the depth from a position in the RECTIFIED color image. Exactly one of
+    these two images should be aligned to the other.
     
     Input: int x, the x coordinate from the rectified color image
            int y, the y coordinate from the rectified color image

@@ -3,8 +3,8 @@
 <depth_cm type_id="opencv-matrix">
   <rows>3</rows>
   <cols>3</cols>
-  <dt>f</dt>
+  <dt>d</dt>
   <data>
-    5.73815375e+05 0. -1.82035263e+02 0. 5.10861367e+04 2.29337479e+02
-    0. 0. 1.</data></depth_cm>
+    7.7383060743917963e+02 0. 3.1976688708748799e+02 0.
+    9.7637227240881668e+02 2.3482849313472425e+02 0. 0. 1.</data></depth_cm>
 </opencv_storage>
