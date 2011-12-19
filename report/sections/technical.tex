@@ -15,17 +15,12 @@ Microsoft corp., in turn, began selling the Kinect-branded implementation on 10
 November 2010 as an optional user interface for its consumer gaming platform,
 the Xbox 360.
 
-%describe reverse engineering, drivers, and api's in this section?
-%
-%common applications in this section?
 
 \subsection{Specifications}
 
 Table \ref{tab:specs} provides an overview of the electronic components that
 comprise the Kinect's sensor array.
 
-%nb: REF means reference to be included
-%
 \begin{table}[ht]
 \centering
 \begin{tabular}{l p{10cm}}
@@ -82,15 +77,16 @@ of the standard computer vision process known as stereo triangulation. In this
 section we describe the depth measurement implementation in relatively high
 level terms, from the perspective of theoretical computer vision. These
 descriptions are based on our interpretation of public records, including
-patents and casual articles. We also refer, though to a lesser extent, to our
-own experiments with the Kinect.
+patents and scholarly as well as casual articles. We also refer, though to a
+lesser extent, to our own experiments with the Kinect.
 
 
 \subsection{Stereo triangulation}
+\label{sub:triang}
 
 Figure \ref{fig:triang} shows the idealised configuration of two cameras,
 $c_{l}$ and $c_{r}$, set up as a stereo unit, and a point, $p$, on an object
-viewed by both cameras.  In this model, we simplify: 
+viewed by both cameras. In this model, we simplify: 
 
 \begin{itemize}
 
@@ -99,9 +95,6 @@ viewed by both cameras.  In this model, we simplify:
     \item   the stereo set-up so that the image planes of the two cameras
             (represented here for convenience' sake as positioned in front of
             the focal points) are coincident;
-
-    \item   
-
 
 \end{itemize}
 
@@ -113,24 +106,94 @@ viewed by both cameras.  In this model, we simplify:
     \end{center}
 \end{figure}
 
+The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x-y$ plane to
+$p$. We obtain $Z_{p}$ from: 
 
-\subsection{Stereo triangulation with projected dot pattern}
+\begin{itemize}
 
-% place figure for active stereo triangulation
+    \item the focal length ($f$);
 
-in the kinect a corresponds to a' etc
-cf slides
+    \item the inter-camera distance ($b$); and 
+
+    \item the respective distances between left and right camera norms and the
+    pixels corresponding to $p$ on the left and right image planes ($x_{l}$ and
+    $x_{r}$),
+
+\end{itemize}
+
+using the similarity of triangles, which yields equation
+\ref{eqn:triang1}.
+
+%todo show algebra to derive this
+\begin{align}
+    \label{eqn:triang1}
+    \frac{Z_p}{b} = \frac{Z_p - f}{b - x_l - x_r}
+\end{align}
+
+
+\subsection{Stereo triangulation: the Kinect way}
+
+Figure \ref{fig:atriang} shows the triangulation model adapted, \emph{mutatis
+mutandis}, to a depth camera ($c$) projector ($s$) pair. This is sometimes
+referred to as ``active triangulation'' \cite{alexander1987}, since one replaces
+one passive component (a camera) with an active one (a projector). The same
+simplifications apply as in section \ref{sub:triang}. The projector replaces the
+second camera here, and we distinguish the target point ($p_a$) on the object
+plane from the corresponding point ($p_r$) on a predetermined reference plane.
+
+\begin{figure}[ht]
+    \begin{center}
+        \input{tikz_figures/projection_triangulation}
+        \caption{``Active'' stereo triangulation}
+        \label{fig:atriang}
+    \end{center}
+\end{figure}
+
+Now it is worth emphasising the order in which the Kinect proceeds: First, for
+every point ($p_a$) in the depth image, it finds the matching point ($p_r$) in
+the reference image by solving the so-called ``correspondence problem''
+discussed in section \ref{sub:corr}. Once the $p_r$ in question is known, $p_a$
+is determined as the intersection of the $(p_r,s)$ and $(c,x)$ lines, where $x$
+is the target pixel on the image plane. Then it is again possible to derive the desired depth value, $Z_a$, from:
+
+\begin{itemize}
+
+    \item the focal length ($f$);
+
+    \item the inter-camera distance ($b$);
+
+    \item the distance between $x$ and the pixel corresponding to $p_r$ on the image plane ($d_i$);
+
+    \item the distance between $p_a$ and the intersection of the $(c,p_r)$ point with the object plane ($d_o$); and
+
+    \item the reference image depth ($Z_r$),
+
+\end{itemize}
+
+using the similarity of triangles, which yields the equation \ref{eqn:atriang1}.
+
+%todo show algebra to derive this
+\begin{align}
+    \label{eqn:atriang1}
+    Z_a = \frac{Z_r}{d \frac{Z_r}{(b f)} + 1}
+\end{align}
 
 
 \subsubsection{Experiment: pattern variation over distance}
 
-describe experiment with pictures... 
+%todo describe experiment with pictures... (first discuss whether useful with Jeroen)
+
+
+\subsection{Correspondence problem}
+\label{sub:corr}
+
+%todo describe experiment with pictures... 
 
 
 \section{Precision of the intrument}
 \label{precision}
 
-
+%todo: just take data from article
 In this section we describe the Kinect's characteristics as a depth measurement
 tool, and notably the precision of the measurements.
 
