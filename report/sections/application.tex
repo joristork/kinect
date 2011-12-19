@@ -26,20 +26,41 @@ Done by Jimi.
 Done by Jimi.
 
 \subsection{Creating a model}
-\subsubsection{The algorithm}
-In stereo calibrate we found two intrinic matrices and two sets of distortion coefficients, two rotation matrices and two translation matrices. All these matrices can be used to undistort both images, so that an object in the depth image is in the same place as an object in the RGB image. We undistort the images using the InitUndistortRectifyMap function from OpenCV. \\
-\\
- For now,  \\
-We use these corners to determine the orientation of our field. This is done by clicking on the corners in the image we get from the RGB camera, after we undistort the image. 
 
-To create a model of our 3d object we start by determining the field we are going to use. We do that using an A3 sized field with corners that are colored (in order) green, blue, red and black. Now the depth image and the RGB image are aligned and calibrated we can start. The module "create\_model.py" asks the user to click on the pixels in the RGB image, where the corners of the A3 sized workingfield are (see Figure \ref{fig:clicking}). It is important that this is done in the correct order (information is provided in the image).
+\subsubsection{The algorithm}
+
+%todo: with "stereo calibrate" do you mean some kinect interface module or our
+%own stereo calibration step? I am assuming the latter for now...
+
+Information derived at the stereo\texttt{stereo calibrate} stage will help with
+pre-processing the Kinect image streams. We notably obtained: two intrinsic
+matrices; two sets of distortion coefficients; two rotation matrices; and two
+translation matrices. All these matrices can be used to undistort both images,
+so that an object in the depth image is in the same place as an object in the
+RGB image. We undistort the images using the \texttt{InitUndistortRectifyMap}
+function from OpenCV.\\
+
+With the two image streams pre-processed, the application proceeds to build the
+model. The first step is to determine the ``working field''. This is done with
+an A3-size sheet of white paper placed on a flat surface. The corners of the
+sheet are colored (in order) green, blue, red and black.\\
+
+For now, the application requires users to manually determine the orientation of
+the working field. The \texttt{create\_model.py} module prompts the user to
+click on the pixels in the RGB image corresponding to the coloured corners of
+the A3 sheet (see figure \ref{fig:clicking}). Information displayed in the image helps the user to select the points in the correct order.
+
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.5]{images/clicking.png}
 \caption{Clicking on the corners of the working field}
 \label{fig:clicking}
 \end{figure}
-Since we have a depth image, we can make a "working cube" by taking the (x,y,z) value from the points (were the z value is derived from the depth image). The code displayed in \ref{code:cube} is applied to get all 8 points of a cube.\\
+
+With the help of the $z$ values from the depth image, the selected points'
+$(x,y,z)$ coordinates are determined. The code displayed in \ref{code:cube}
+derives from this information all 8 points of a ``working cube''.\\
+
 \begin{figure}[H]
 \begin{lstlisting}
 for i in xrange(4):
@@ -53,36 +74,68 @@ for i in xrange(4):
     cubic[i + 4] = cubic[i + 4] / np.linalg.norm(cubic[i + 4])
     cubic[i + 4] = (cubic[i + 4] * height) + cubic[i]
 \end{lstlisting}
-\caption{The algorithm to create a 3 dimensional cube}
+\caption{Algorithm to create a 3 dimensional cube}
 \label{code:cube}
 \end{figure}
-The values of the points we calculate are very rough, so we don't use them later on in our algorithm. We only use the calculated cube to display a wireframe on top of the rgb and depth image, so that the user can determine if the field is correct. At this point, the user can choose to start over or proceed with the points he/she clicked on. \\
-\\
-All the ingredients to start getting points for our 3d representation in points are now available:\\
+
+Since the working cube coordinates derived in this way are relatively
+inaccurate, they are only used to overlay the cube's wireframe on the rgb and
+depth images for the user's benefit. This enables the user to determine whether
+they have correctly identified the working field to the application, and then to
+proceed or start over as necessary.\\
+
+All the ingredients to begin obtaining points for our 3d representation are now
+in place:
+
 \begin{itemize}
-\item Four image points (the points we clicked on)
-\item A calibrated numpy array containing all RGB values at the moment when the first click was done
-\item A calibrated numpy array containing all Depth values at the moment when the first click was done
+
+\item Four user-selected working field points.
+
+\item A calibrated numpy array containing the whole RGB image as it was at the
+moment of the first first click;
+
+\item A calibrated numpy array containing the whole depth image, also from the
+moment of the first click.
+
 \end{itemize}
-For all points we found in the image, we need to determine the point in the object space. The object space is the cubicle we found earlier, but we didn't determine the axis of the object space. Since we have clicked on all points of the A3 sized plane in a predetermined order, we can choose the axis of our cube. We choose the following: 
+
+For each point in the image, the application needs to determine the
+corresponding point in the object space. The object space was represented to the
+user with the ``working cube'' wireframe. Now the application derives the axes
+of the object coordinate system from the predetermined order in which the user
+selected the coloured working plane corners. The following convention applies:
+
 \begin{itemize}
-\item The origin is in the point above the green corner
-\item The x axis is the line that goes threw the origin and the point above the blue corner
-\item The y axis is the line that goes threw the origin and the green corner
-\item The z axis is the line that goes threw the origin and the point above the black corner
+
+\item The origin is in the corner of the cube ``above'' the green corner of the
+working field.
+
+\item The x axis runs through the origin and the working cube corner ``above'' the
+working field's blue corner.
+
+\item The y axis runs through the origin and the working field's green corner.
+
+\item The z axis runs through the origin and the point ``above'' the working
+field's black corner
+
 \end{itemize}
-The result is visualized in \ref{fig:axis}. 
+
+The result is visualized in figure \ref{fig:axis}. \\
+
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.5]{images/axis.png}
 \caption{Calculated cube, with axis}
 \label{fig:axis}
 \end{figure}
-We still have to set how large the cube is in object space (in other words, 
-how many pixels our 3d object will have). We chose for 100 in the x direction,
-100 in the y direction (height of the cube) and 141 for the z direction 
-(this is the result of $100 * \sqrt(2)$, which is the ratio of a A3 sized plane).
-The points we clicked on can therefore be translated to object space coordinates:\\
+
+The cube's dimensions are then normalised to $100$ respectively in the $x$ and
+$y$ directions, and $141$ for the $z$ direction. The last dimension is the value
+of $100 * \sqrt(2)$, which in turn is the length to width ratio of an A3 sheet.
+The manually selected points can now be translated to object space coordinates
+as follows: \\
+
+% todo proper equation formatting throughout section instead of \\'s
 $\vec{green} = \left[ \begin{array}{ccc} 
 0\\
 100\\
@@ -98,15 +151,16 @@ $\vec{red} = \left[ \begin{array}{ccc}
 $\vec{black} = \left[ \begin{array}{ccc} 
 0\\
 100\\
-141  \end{array} \right] $\\
-The points in object space is the last information we need 
-to use the FindExtrinsicCameraParams2 function from opencv. Because we already
-undistorted the image in the beginning, we use the identity matrix as the intrinsic 
-matrix. For the distortion we can use NULL (same reason). The function returns a
-rotation matrix vector and a translation vector. We can make a rotation matrix
-from the rotation vector by using the rodrigues2 function in opencv. Together 
-with the translation vector, we can make the extrinsic matrix. This is all 
-we need for the equation\\
+141  \end{array} \right] $\\ \\ \\
+The points in object space are last information necessary to use the
+\texttt{FindExtrinsicCameraParams2} function from OpenCV. Because the image is
+undistorted during pre-processing, the identity matrix serves as the intrinsic
+matrix, and \texttt{NULL} is passed as the distortion parameter. The function
+returns a rotation matrix vector and a translation vector. A rotation matrix is
+derived from the rotation vector using the \texttt{rodrigues2} function in
+OpenCV. Then, the extrinsic matrix is derived from the translation vector. The
+resulting information can be inserted in the equation:\\
+\\
 $s \left[ \begin{array}{ccc} 
 u\\
 v\\
@@ -125,53 +179,90 @@ y\\
 z\\
 1  \end{array} \right] 
 $.\\
-In this equation, $\left[ \begin{array}{ccc} 
+
+In this equation,  \\
+
+$\left[ \begin{array}{ccc} 
 u\\
 v\\
-1 \end{array} \right]$ are the image coordinates,\\ $\left[ \begin{array}{ccc} 
+1 \end{array} \right]$  \\
+
+are the image coordinates,\\ 
+
+$\left[ \begin{array}{ccc} 
 x\\
 y\\
 z\\
 1  \end{array} \right] 
-$ are the coordinates in object space,\\
+$  \\
+
+are the coordinates in object space,\\
+
 $\left[ \begin{array}{ccc} 
 f_{x} & 0 & c_{x}\\
 0 & f_{y} & x_{y}\\
-0 & 0 & 1 \end{array} \right] $ is the intrinsic matrix (identity) and \\
+0 & 0 & 1 \end{array} \right] $  \\
+
+is the intrinsic matrix (identity) and\\
+
 $\left[ \begin{array}{cccc} 
 r_{11} & r_{12} & r_{13} & t_{1}\\
 r_{21} & r_{22} & r_{23} & t_{2}\\
-r_{31} & r_{32} & r_{33} & t_{3} \end{array} \right]$ is the extrinsic matrix.\\\\
-Now, because we have to calculate s for every coordinate, we have to do a very
-inefficient calculation. We use the above equation for all points in the object
-space to determine 
+r_{31} & r_{32} & r_{33} & t_{3} \end{array} \right]$ \\
+
+is the extrinsic matrix.\\
+
+Now, since it has to be performed for every coordinate, calculating $s$ becomes
+a costly operation. For all points in the object space, the above equation \\ % use
+% reference to label after proper equation formatting determines:
+
 $\left[ \begin{array}{ccc} 
 u * s\\
 v * s\\
-s \end{array} \right] $.\\ We can divide by s, to get the corresponding 
-coordinate in the depth image. We go back to the four points we clicked
-on. Every point has a corresponding depth value in the depth image. We use
-the lowest and the highest value and store them as boundaries. For every 3d
-point in the cubicle we check if the corresponding value in the depth image
-(first interpolate) is between the boundaries. If so we pass the 3d point to the
-point cloud viewer. 
-\subsubsection{Defects and TODO}
+s \end{array} \right] $.\\ 
+
+Dividing by $s$ then yields the corresponding coordinate in the depth image.
+Now, back to the four manually selected points: Every point has a corresponding
+depth value in the depth image. The application selects the maximum and minimum
+depth values for the four manually selected points, and stores them as boundary
+values. For every point within the cube we check if the corresponding value in
+the depth image is between the interpolated boundaries. If so we pass the 3d
+point to the point cloud viewer. 
+
+\subsubsection{Defects and todo}
+
 Defects (at the time of writing):
+
 \begin{itemize}
+
 \item Something goes wrong in the FindExtrinsicCameraParams2, it returns NaN for the translation vector.
+
 \item We still work with distorted images, since the stereo calibration wasn't done.
+
 \item We don't know if the cubicle size is correct.
+
 \item We haven't implemented anything after we needed after FindExtrinsicCameraParams2 because it doesn't work
+
 \end{itemize}
-TODO:
+
+Todo: 
+
 \begin{itemize}
-\item Undistort and rectify the images
-\item Find a replacement for FindExtrinsicCameraParams2
-\item Apply the extrinsic matrix to all object points and check if values of those points are between the depth boundaries.
-\item Send points to the point cloud viewer
-\item Color the points using the rgb image
-\item Auto detect the corners of our "working field"
+
+\item Undistort and rectify the images%todo
+
+\item Find a replacement for FindExtrinsicCameraParams2%todo
+
+\item Apply the extrinsic matrix to all object points and check if values of those points are between the depth boundaries.%todo
+
+\item Send points to the point cloud viewer%todo
+
+\item Color the points using the rgb image%todo
+
+\item Auto detect the corners of our "working field"%todo
+
 \end{itemize}
+
 \subsection{Point Cloud Viewer}
 
 The point cloud viewer was developed after examining various possible
@@ -207,17 +298,19 @@ visual with the simple command "points".
 Currently the point cloud viewer does not support realtime capture, but capture
 is done quickly and easily using the 'c' key.
 
-
 The low-level interface includes the option for depth smoothing.
 
 \subsection{Combining it all}
-We have made a Kinect.py module that gives the user a menu. It also takes
-arguments. Using arguments, a user can load matrices for undistoring and
-rectifying the images from files. If this hasn't been done, the user has to
-choose to calibrate first. A user is given the choice by a menu. The second
-choice in the menu is to start making a 3d model. This will open the point 
-cloud viewer, a rgb screen displaying the image from the rgb camera and a 
-depth screen displaying the depth camera. Everytime a user makes a capture,
-all points are send to the point cloud viewer. The esc button closes all windows
-and brings the user back to the menu.
 
+% in para below: "from files" = the matrices or the images?
+
+The \texttt{Kinect.py} offers a user interface to the application. The file can
+be executed using command line arguments to load matrices for undistoring and
+rectifying the images from files. Once executed, the \texttt{Kinect.py} module
+offers the user a menu. The first menu item offers a calibration process in case
+this has not yet been performed.  Via the second menu choice the user can start
+to build a 3d model. This opens: a point cloud viewer; an ``rgb'' screen that
+displays images from the rgb camera; and a ``depth'' screen that displays depth
+camera images. Whenever the user triggers an image capture, all points are sent
+to the point cloud viewer. Pressing \texttt{esc} closes all windows and returns
+the user to the menu.
