@@ -38,12 +38,12 @@ matrices; two sets of distortion coefficients; two rotation matrices; and two
 translation matrices. All these matrices can be used to undistort both images,
 so that an object in the depth image is in the same place as an object in the
 RGB image. We undistort the images using the \texttt{InitUndistortRectifyMap}
-function from OpenCV.\\
+function from OpenCV.
 
 With the two image streams pre-processed, the application proceeds to build the
 model. The first step is to determine the ``working field''. This is done with
 an A3-size sheet of white paper placed on a flat surface. The corners of the
-sheet are colored (in order) green, blue, red and black.\\
+sheet are colored (in order) green, blue, red and black.
 
 For now, the application requires users to manually determine the orientation of
 the working field. The \texttt{create\_model.py} module prompts the user to
@@ -82,11 +82,10 @@ Since the working cube coordinates derived in this way are relatively
 inaccurate, they are only used to overlay the cube's wireframe on the rgb and
 depth images for the user's benefit. This enables the user to determine whether
 they have correctly identified the working field to the application, and then to
-proceed or start over as necessary.\\
+proceed or start over as necessary.
 
 All the ingredients to begin obtaining points for our 3d representation are now
 in place:
-
 \begin{itemize}
 
 \item Four user-selected working field points.
@@ -104,7 +103,6 @@ corresponding point in the object space. The object space was represented to the
 user with the ``working cube'' wireframe. Now the application derives the axes
 of the object coordinate system from the predetermined order in which the user
 selected the coloured working plane corners. The following convention applies:
-
 \begin{itemize}
 
 \item The origin is in the corner of the cube ``above'' the green corner of the
@@ -133,35 +131,36 @@ The cube's dimensions are then normalised to $100$ respectively in the $x$ and
 $y$ directions, and $141$ for the $z$ direction. The last dimension is the value
 of $100 * \sqrt(2)$, which in turn is the length to width ratio of an A3 sheet.
 The manually selected points can now be translated to object space coordinates
-as follows: \\
-
-% todo proper equation formatting throughout section instead of \\'s
-$\vec{green} = \left[ \begin{array}{ccc} 
+as follows:
+$$
+\vec{green} = \left[ \begin{array}{ccc} 
 0\\
 100\\
-0  \end{array} \right] $,
-$\vec{blue} = \left[ \begin{array}{ccc} 
+0  \end{array} \right], \quad
+\vec{blue} = \left[ \begin{array}{ccc} 
 100\\
 100\\
-0  \end{array} \right] $,
-$\vec{red} = \left[ \begin{array}{ccc} 
+0  \end{array} \right], \quad
+\vec{red} = \left[ \begin{array}{ccc} 
 100\\
 100\\
-141  \end{array} \right] $,
-$\vec{black} = \left[ \begin{array}{ccc} 
+141  \end{array} \right], \quad
+\vec{black} = \left[ \begin{array}{ccc} 
 0\\
 100\\
-141  \end{array} \right] $\\ \\ \\
+141  \end{array} \right].
+$$
 The points in object space are last information necessary to use the
-\texttt{FindExtrinsicCameraParams2} function from OpenCV. Because the image is
+\texttt{FindExtrinsic\-CameraParams2} function from OpenCV. Because the image is
 undistorted during pre-processing, the identity matrix serves as the intrinsic
 matrix, and \texttt{NULL} is passed as the distortion parameter. The function
 returns a rotation matrix vector and a translation vector. A rotation matrix is
 derived from the rotation vector using the \texttt{rodrigues2} function in
-OpenCV. Then, the extrinsic matrix is derived from the translation vector. The
-resulting information can be inserted in the equation:\\
-\\
-$s \left[ \begin{array}{ccc} 
+OpenCV. Then, the extrinsic matrix is derived from the translation vector. 
+
+The resulting information can be inserted in the equation:\\
+\begin{equation}\label{eq:pipeline}
+s \left[ \begin{array}{ccc} 
 u\\
 v\\
 1 \end{array} \right] = 
@@ -178,48 +177,48 @@ x\\
 y\\
 z\\
 1  \end{array} \right] 
-$.\\
-
-In this equation,  \\
-
-$\left[ \begin{array}{ccc} 
+.
+\end{equation}
+In this equation,
+$$
+\left[ \begin{array}{ccc} 
 u\\
 v\\
-1 \end{array} \right]$  \\
-
-are the image coordinates,\\ 
-
-$\left[ \begin{array}{ccc} 
+1 \end{array} \right]
+$$
+are the image coordinates,
+$$
+\left[ \begin{array}{ccc} 
 x\\
 y\\
 z\\
 1  \end{array} \right] 
-$  \\
-
-are the coordinates in object space,\\
-
-$\left[ \begin{array}{ccc} 
+$$
+are the coordinates in object space,
+$$
+\left[ \begin{array}{ccc} 
 f_{x} & 0 & c_{x}\\
 0 & f_{y} & x_{y}\\
-0 & 0 & 1 \end{array} \right] $  \\
-
-is the intrinsic matrix (identity) and\\
-
-$\left[ \begin{array}{cccc} 
+0 & 0 & 1 \end{array} \right]
+$$
+is the intrinsic matrix (identity) and
+$$
+\left[ \begin{array}{cccc} 
 r_{11} & r_{12} & r_{13} & t_{1}\\
 r_{21} & r_{22} & r_{23} & t_{2}\\
-r_{31} & r_{32} & r_{33} & t_{3} \end{array} \right]$ \\
-
-is the extrinsic matrix.\\
+r_{31} & r_{32} & r_{33} & t_{3}
+\end{array} \right]
+$$
+is the extrinsic matrix.
 
 Now, since it has to be performed for every coordinate, calculating $s$ becomes
-a costly operation. For all points in the object space, the above equation \\ % use
-% reference to label after proper equation formatting determines:
-
-$\left[ \begin{array}{ccc} 
-u * s\\
-v * s\\
-s \end{array} \right] $.\\ 
+a costly operation. For all points in the object space, equation \ref{eq:pipeline} determines:
+$$
+\left[ \begin{array}{ccc} 
+u s\\
+v s\\
+s \end{array} \right].
+$$
 
 Dividing by $s$ then yields the corresponding coordinate in the depth image.
 Now, back to the four manually selected points: Every point has a corresponding
