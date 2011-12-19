@@ -25,17 +25,17 @@
     \end{scope}
 
     % point on object
-    \draw [fill, red] (-6.5,9) circle [radius=0.05];
+    \draw [fill, red] (-6.5,9) circle (0.05);
     \draw node [above right] at (-6.5,\objectdepth) {$p$};
 
     % left camera
-    \draw [fill, blue] (-12,0) circle [radius=0.05];
+    \draw [fill, blue] (-12,0) circle (0.05);
     \draw node [below left] at (\xcl,0) {$c_{l}$};
     % left image plane
     \draw[-, thick] (\xcl - \imageplaneshalfwidth,\yimageplanes) coordinate (ipl1)-- (\xcl + \imageplaneshalfwidth, \yimageplanes) coordinate (ipl2);
 
     % right camera
-    \draw [fill, blue] (-3,0) circle [radius=0.05];
+    \draw [fill, blue] (-3,0) circle (0.05);
     \draw node [below right] at (\xcr,0) {$c_{r}$};
     % right image plane
     \draw[-, thick] (\xcr - \imageplaneshalfwidth,\yimageplanes) coordinate (ipr1)-- (\xcr + \imageplaneshalfwidth, \yimageplanes) coordinate (ipr2);
@@ -49,9 +49,9 @@
 
     % image points
     \coordinate (pixell) at (intersection of ipl1--ipl2 and rayl1--rayl2);
-    \draw[fill, orange] (pixell) circle [radius=0.05];
+    \draw[fill, orange] (pixell) circle (0.05);
     \coordinate (pixelr) at (intersection of ipr1--ipr2 and rayr1--rayr2);
-    \draw[fill, orange] (pixelr) circle [radius=0.05];
+    \draw[fill, orange] (pixelr) circle (0.05);
 
     % focal length
     \draw[<->, thick, gray] (\xcl - \xdistoffsetf,0) -- (\xcl - \xdistoffsetf,\yimageplanes);
