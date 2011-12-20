@@ -84,7 +84,13 @@ def capture(cached_data=False):
     print "Generating object..."
 
     pts = points(pos=pos_list)
+
+    # Restore old position.
     if old_pts:
+        pts.x = old_pts.x
+        pts.y = old_pts.y
+        pts.z = old_pts.z
+
         old_pts.visible = False
 
     print "Captured..."
@@ -109,5 +115,9 @@ while True:
             pts.y += 20
         elif s == 'l':
             pts.x += 20
+        elif s == '[':
+            pts.z -= 20
+        elif s == ']':
+            pts.z += 20
         elif s == 'c':
             capture(cached_data=cached_data)
