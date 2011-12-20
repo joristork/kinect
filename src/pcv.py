@@ -2,11 +2,13 @@
 from pylab import *
 from visual import *
 import freenect
+import time
 
+cached_data = False
 MAX_DEPTH=2047
 scene = display()
 
-# I have left this code here for documentative purposes
+# NOTE: I have left this code here for documentative purposes
 # We will be removing this in the future
 def point_array(depth):
     for y, line in enumerate(depth):
@@ -30,31 +32,67 @@ def generate_3d_grid():
 # A nice memory/speed tradeoff
 cached_3d_grid = generate_3d_grid()
 
+def generate_filter_grid():
+    f = 4
+
+    width = dstack([reshape(ones((640/f,)), (1, -1, 1)),
+                    reshape(arange(0, 640, f), (1, -1, 1))])
+
+    height = dstack([reshape(arange(0, 480, f), (-1, 1, 1)),
+                     reshape(ones((480/f,)), (-1, 1, 1))])
+
+    return array((width * height).reshape((-1, 2)), dtype=int)
+    
+
+cached_filter_grid = generate_filter_grid()
+
 def point_array_numpy(depth):
     """
     NumPy version of point array, that allows for speed improvements.
     """
+    start_time = time.time()
 
-    return reshape(dstack([cached_3d_grid, 2047 - depth]), (-1, 3))
+    # Mirror the Z-axis and transform 3D grid to depth image.
+    depth_image = dstack([cached_3d_grid, MAX_DEPTH - depth])
+
+    # Shrink data set by a factor of 4 and convert to list of 3D-vectors.
+    point_list = depth_image[cached_filter_grid[:,0], cached_filter_grid[:,1]]
+
+    print "Filtering..."
+    f = point_list[:,2] != 0
+    point_list = point_list[f]
+
+    print 'elapsed: %.3f sec' % (time.time() - start_time)
+
+    return point_list
 
 pts = None
 
-def capture():
+def capture(cached_data=False):
     global pts
     old_pts = pts
-    depth = freenect.sync_get_depth()[0]
+
+    if cached_data:
+        depth = np.load('kinect1.npy')
+    else:
+        depth = freenect.sync_get_depth()[0]
+
     print "Converting..."
     #pos_list = list(point_array(depth))
     pos_list = point_array_numpy(depth)
+
     print "Generating object..."
+
     pts = points(pos=pos_list)
     if old_pts:
         old_pts.visible = False
+
     print "Captured..."
 
-capture()
+capture(cached_data=cached_data)
 
 while True:
+    rate(60)
     if scene.kb.keys: # is there an event waiting to be processed?
         s = scene.kb.getkey() # obtain keyboard information
         #if len(s) == 1:
@@ -72,5 +110,4 @@ while True:
         elif s == 'l':
             pts.x += 20
         elif s == 'c':
-            capture()
-
+            capture(cached_data=cached_data)
