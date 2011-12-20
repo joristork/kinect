@@ -92,9 +92,10 @@ viewed by both cameras. In this model, we simplify:
 
     \item   the sensors as pinhole cameras;
 
-    \item   the stereo set-up so that the image planes of the two cameras
-            (represented here for convenience' sake as positioned in front of
-            the focal points) are coincident;
+    \item   the stereo set-up so that the cameras' normal lines are parallel;
+
+    \item   the camera planes are ``flipped'' to the front of the focal points
+    for ease of illustration.
 
 \end{itemize}
 
@@ -107,7 +108,7 @@ viewed by both cameras. In this model, we simplify:
 \end{figure}
 
 The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x-y$ plane to
-$p$. We obtain $Z_{p}$ from: 
+$p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from: 
 
 \begin{itemize}
 
@@ -150,12 +151,15 @@ plane from the corresponding point ($p_r$) on a predetermined reference plane.
 
 %todo uhm, notation for lines, again?
 Now it is worth emphasising the order in which the Kinect proceeds: First, for
-every point ($p_a$) in the depth image, it finds the matching point ($p_r$) in
-the reference image by solving the so-called ``correspondence problem''
-discussed in section \ref{sub:corr}. Once the $p_r$ in question is known, $p_a$
-is determined as the intersection of the $(p_r,s)$ and $(c,x)$ lines, where $x$
-is the target pixel on the image plane. Then it is again possible to derive the
-desired depth value, $Z_a$, from:
+every image pixel $x_a$ corresponding to a point ($p_a$) registered by the depth
+camera, the Kinect finds the matching reference image pixel $x_r$ corresponding
+to a point ($p_r$) on the reference plane by solving the so-called
+``correspondence problem'' discussed in section \ref{sub:corr}. Once a matching
+reference point $p_r$ is found, the Kinect determines the disparity $d_i$ along
+the $x$-axis in image space between the actual image of $p_a$ and the reference
+image of $p_r$. With that obtained, is it possible to derive the desired ``depth
+measurement'' for the given point, or the minimum distance from the depth
+camera's focal point to the object plane, from: 
 
 \begin{itemize}
 
@@ -163,33 +167,37 @@ desired depth value, $Z_a$, from:
 
     \item the inter-camera distance ($b$);
 
-    \item the distance between $x$ and the pixel corresponding to $p_r$ on the
-    image plane ($d_i$);
-
-    \item the distance between $p_a$ and the intersection of the $(c,p_r)$ point
-    with the object plane ($d_o$); and
+    \item the disparity between $x_a$ and $x_r$ along the x-axis ($d_i$);
 
     \item the reference image depth ($Z_r$),
 
 \end{itemize}
 
-using the similarity of triangles, which yields the equation \ref{eq:atriang1}.
+using the similarity of triangles, which yields equations \ref{eq:atriang1} and
+\ref{eq:atriang2}. Substituting for the common variable $d_o$, we simplify to
+obtain equation \ref{eq:atriang2}.
 
 %todo show algebra to derive this
-\begin{equation} \label{eq:atriang1}
+\begin{align} 
+    \frac{d_o}{b} = \frac{Z_r - Z_a}{Z_r} \label{eq:atriang1}\\
+    \frac{d_i}{f} = \frac{d_o}{Z_a} \label{eq:atriang2}
+\end{align}
+
+\begin{equation} \label{eq:atriang2}
     Z_a = \frac{Z_r}{d_i \frac{Z_r}{(b f)} + 1}
 \end{equation}
-
-
-\subsubsection{Experiment: pattern variation over distance}
-
-%todo describe experiment with pictures... (first discuss whether useful with Jeroen)
-
 
 \subsection{Correspondence problem}
 \label{sub:corr}
 
+In order to ca
+
 %todo describe experiment with pictures... 
+
+%\subsubsection{Experiment: pattern variation over distance}
+
+%todo describe experiment with pictures... (first discuss whether useful with Jeroen)
+
 
 
 \section{Precision of the intrument}
