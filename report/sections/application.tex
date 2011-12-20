@@ -44,6 +44,7 @@ def runloop(depth=None, video=None, body=None, vmode=VIDEO_RGB):
 
 
 \subsection{Stereo Calibrate}
+\label{sec:stereo_calibrate}
 
 \subsubsection{Theory}
 % TODO: reference to http://opencv.willowgarage.com/documentation/python/camera_calibration_and_3d_reconstruction.html
@@ -97,7 +98,14 @@ CalibrateCamera2(objectPoints, imagePoints, pointCounts, imageSize, cameraMatrix
 
 Figure \ref{code:calibratecamera2} shows us the camera calibration function of OpenCV. It requires you to give the real world coordinates (\verb|objectPoints|) of some points in an image from the camera (\verb|imagePoints|). It provides you the intrinsic matrix (\verb|cameraMatrix|), the camera's distortion coefficients (\verb|distCoeffs|) and the rotation and translation vectors that translate a point in world coordinates to a point in a coordinate system that is fixed to the camera.
 
-The main challenge here is to find a good way to get the image and object points. Thanks to the fact that we \emph{are} able to get the raw infrared image from the Kinect (see section \ref{sec:mod_to_freenect}), we can use OpenCV's automatic chessboard recognition for both cameras. Using this, we find the image points.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/calibrating.png}
+\caption{Calibrating arrangement}
+\label{fig:calibrating}
+\end{figure}
+
+The main challenge here is to find a good way to get the image and object points. Thanks to the fact that we \emph{are} able to get the raw infrared image from the Kinect (see section \ref{sec:mod_to_freenect}), we can use OpenCV's automatic chessboard recognition for both cameras. The Kinect's dot pattern however distorts the infrared image. Therefore, the infrared projector should be covered when calibrating (like in figure \ref{fig:calibrating}).  Using this, we find the image points.
 
 Since we know the properties of a checkerboard, we can also derive the object points:
 \[
@@ -108,7 +116,14 @@ Since we know the properties of a checkerboard, we can also derive the object po
 \end{array}\right]
 \]
 
-Now that we know the intrinsic matrices for both cameras, we can start looking for the rotation matrix and translation vector between the coordinate systems of both cameras. In OpenCV, this is done by the function \verb|StereoCalibrate| (see figure \ref{code:stereocalibrate}). 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/chessboard.png}
+\caption{Chessboard recognition in both the RGB and IR image}
+\label{fig:chessboard}
+\end{figure}
+
+As can be seen in figure \ref{fig:chessboard}, the chessboard corners are easily found. From this, the intrinsic matrices will be generated. Now that we know the intrinsic matrices for both cameras, we can start looking for the rotation matrix and translation vector between the coordinate systems of both cameras. In OpenCV, this is done by the function \verb|StereoCalibrate| (see figure \ref{code:stereocalibrate}). 
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -130,10 +145,101 @@ Luckily, this doesn't mean that we are stuck here. While wandering around on the
 \subsection{Aligning depth and color images}
 
 \subsubsection{Rectification}
+In order to align the depth image with the color image from the Kinect, these images first need to be rectified. Rectification is the process that reprojects image planes so that they reside in
+the exact same plane and their epipolar lines become parallel. In OpenCV, you need three functions to rectify an image. The first one is \verb|StereoRectify| (see figure \ref{code:stereorectify}).
+
+\begin{figure}[H]
+\begin{lstlisting}
+StereoRectify(cameraMatrix1, cameraMatrix2, distCoeffs1, distCoeffs2, imageSize, R, T, R1, R2, P1, P2, Q=NULL, flags=CV_CALIB_ZERO_DISPARITY, alpha=-1, newImageSize=(0, 0))
+\end{lstlisting}
+\caption{OpenCV stereo rectification function}
+\label{code:stereorectify}
+\end{figure}
+
+In order to call this function, you need the camera matrices and distortion coefficients as well as the rotation matrix and the translation vector between those cameras. These were derived in the calibration step (see section \ref{sec:stereo_calibrate}). The function finally returns four matrices: R1, R2, P1 and P2. R1 and R2 are the rectification transforms for the first and second camera, respectively. P1 and P2 are the projection matrices in the new rectified coordinate systems. These four matrices can be used in the next step: \verb|InitUndistortRectifyMap| (see figure \ref{code:initrecmap}).
+
+\begin{figure}[H]
+\begin{lstlisting}
+InitUndistortRectifyMap(cameraMatrix, distCoeffs, R, P, mapx, mapy)
+\end{lstlisting}
+\caption{OpenCV initialization of the rectification maps}
+\label{code:initrecmap}
+\end{figure}
+
+As you can see, this function only takes one camera matrix, one set of distortion coefficients, etcetera. This indicates that we have to call this function twice: once for the depth image and once for the color image. The function returns two maps, \verb|mapx| and \verb|mapy|, that map the pixels of an image to the right position in the rectified image. This mapping process is done in the final step of rectification: \verb|Remap| (see figure \ref{code:remap}).
+
+\begin{figure}[H]
+\begin{lstlisting}
+Remap(src, dst, mapx, mapy, flags=CV_INNER_LINEAR+CV_WARP_FILL_OUTLIERS, fillval=(0, 0, 0, 0)) 
+\end{lstlisting}
+\caption{OpenCV remap function}
+\label{code:remap}
+\end{figure}
+
+When we provide this function with a non-rectified image (\verb|src|) and two maps (\verb|mapx| and \verb|mapy|), these maps are applied to the image. The resulting image (\verb|dist|) will now be the rectified image we've been looking for (e.g. figure \ref{fig:rectify}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/rectify.png}
+\caption{Raw (left) and rectified (right) color image}
+\label{fig:rectify}
+\end{figure}
+
 
 \subsubsection{Alignment}
 \label{sec:alignment}
 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/homography.png}
+\caption{Good and bad result of FindHomography}
+\label{fig:homography}
+\end{figure}
+
+Now that we've rectified both images, we just have to translate them so that they're completely aligned (i.e., a pixel $\left(x, y\right)$ in the color image is the same pixel at $\left(x, y\right)$ in the depth image). This final translation could be found by just finding one corresponding point in each image, but to minimize distortion, we've decided to, again, use chessboard recognition. Since we still have the images of both the depth and the color camera at calibration time, we can reuse those. After rectifying them, we can create a collection of chessboard corners in the rectified images. Since we use multiple points, we can't use \verb|GetAffineTransform| (max. 3 points) or \verb|GetPerspectiveTransform| (max. 4 points), but we have to use \verb|FindHomography| (see figure \ref{code:findhomography}). As you can see in figure \ref{fig:homography}, this process doesn't always end well. When we use our own derived camera matrices, the process fails, since the rectification matrices are wrong. Otherwise, when we use Nicolas Burrus' matrices, the process ends well. More about this can be found in section \ref{sec:stereo_calibrate}.
+
+\begin{figure}[H]
+\begin{lstlisting}
+FindHomography(srcPoints, dstPoints, H, method=CV_RANSAC, ransacReprojThreshold=3.0, status=None)
+\end{lstlisting}
+\caption{OpenCV remap function}
+\label{code:findhomography}
+\end{figure}
+
+Here, \verb|scrPoints| is the collection of chessboard corners in the rectified depth images, \verb|dstPoints| the collection of chessboard points in the rectified rgb images. The homography matrix (\verb|H|) gives us the final translation between the color and depth images. All we need to do now is apply this translation to the depth image. This can be done by the OpenCV function \verb|WarpPerspective| (see figure \ref{code:warpperspective}).
+
+\begin{figure}[H]
+\begin{lstlisting}
+WarpPerspective(src, dst, mapMatrix, flags=CV_INNER_LINEAR+CV_WARP_FILL_OUTLIERS, fillval=(0, 0, 0, 0))
+\end{lstlisting}
+\caption{OpenCV remap function}
+\label{code:warpperspective}
+\end{figure}
+
+Given a source image (\verb|src|) and a map matrix (\verb|mapMatrix|, we use \verb|H| here), this function gives the resulting image of applying that matrix to the image (\verb|dst|). In figure \ref{fig:aligned}, you can see that the aligned images overlay perfectly.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{images/aligned.png}
+\caption{Overlayed aligned RGB and IR images}
+\label{fig:aligned}
+\end{figure}
+
+
+\subsection{Getting the `real' depth}
+The Kinect's depth output is not on a linear scale. Therefore, if we want to create a 3D object scanner, we have to convert the depth to a linear scale. Because of the short range of the Kinect, we chose to use centimeters as this scale. We found the following formula:
+
+\begin{lstlisting}
+def depth_to_centimeters(d):
+    if d < 2047:
+        return 12.36 * tan(d / 2842.5 + 1.1863)
+    else:
+        return -1.0
+\end{lstlisting}
+%TODO add reference to http://groups.google.com/group/openkinect/browse_thread/thread/31351846fd33c78/e98a94ac605b9f21?lnk=gst&q=stephane#e98a94ac605b9f21
+This function was provided by Dr. St\'ephane Magnenat, but was never derived nor proven. A few tests however showed that it is quite a good approximation.
+
+What may seem odd here is the \verb|if d < 2047| statement, but it isn't. The depth value the kinect returns when it cannot find the depth for a certain point (e.g. when the point is too far away) is 2047. Since we don't want this point to be in our 3D space, we remove it.
 
 \subsection{Creating a model}
 
