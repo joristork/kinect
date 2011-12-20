@@ -18,12 +18,122 @@ breakatwhitespace=false,        % sets if automatic breaks should only happen at
 What follows is a listing of application components.
 
 \subsection{Modifications to Freenect}
+\label{sec:mod_to_freenect}
 
-Done by Jimi.
+The Freenect driver supports getting the raw camera output of the infrared camera. The python wrapper of Freenect however, doesn't provide an easy way to do this. Out of the box, the wrapper provides us a function \verb|runloop| (see figure \ref{code:def_runloop}).
+
+\begin{figure}[H]
+\begin{lstlisting}
+def runloop(depth=None, video=None, body=None):
+    ...
+\end{lstlisting}
+\caption{Default Python wrapper function runloop}
+\label{code:def_runloop}
+\end{figure}
+
+In short, this function initializes the Kinect and starts running a loop in which the Kinect's depth and RGB images are processed. However, the initialization step is static. It always uses the medium quality RGB video mode and the 11-bit depth mode. Since Freenect only supports getting the infrared image as a video mode, we added an optional flag \verb|vmode| to the function (see figure \ref{code:mod_runloop}). By adjusting this value, you can now choose whether you want to see the RGB output or the raw infrared output of the Kinect. To provide backwards compatibility, the default value of this flag is still \verb|VIDEO_RGB|.
+
+\begin{figure}[H]
+\begin{lstlisting}
+def runloop(depth=None, video=None, body=None, vmode=VIDEO_RGB):
+    ...
+\end{lstlisting}
+\caption{Modified Python wrapper function runloop}
+\label{code:mod_runloop}
+\end{figure}
+
 
 \subsection{Stereo Calibrate}
 
-Done by Jimi.
+\subsubsection{Theory}
+% TODO: reference to http://opencv.willowgarage.com/documentation/python/camera_calibration_and_3d_reconstruction.html
+For the calibration of the Kinect cameras we use the pinhole camera model:
+\[
+s m' = A \left[R|t\right]M'
+\]
+or
+\[
+s 
+\left[ \begin{array}{c} 
+u\\
+v\\
+1  
+\end{array} \right]
+=
+\left[ \begin{array}{ccc} 
+f_x & 0 & c_x\\
+0 & f_y & c_y\\
+0 & 0 & 1  
+\end{array} \right]
+\left[ \begin{array}{cccc}
+r_{11} & r_{12} & r_{13} & t_1\\
+r_{21} & r_{22} & r_{23} & t_2\\
+r_{31} & r_{32} & r_{33} & t_3
+\end{array} \right]
+\left[ \begin{array}{c} 
+X\\
+Y\\
+Z\\
+1  
+\end{array} \right]
+\]
+
+Here, $\left( X, Y, Z \right)$ are the coordinates of a 3D point in the world coordinate space, $\left( u, v \right)$ are the coordinates of the projection point in pixels.
+
+$A$ is called the camera matrix or intrinsic matrix. $\left( c_x, c_y \right)$ give a principal point (that is usually at the image center) and $\left( f_x, f_y \right)$ are the focal lengths of the camera, expressed in pixel-related units.
+
+$\left[R|t\right]$ is called the extrinsic matrix. It is used to describe the camera motion around a static scene, or vice versa, rigid motion of an object in front of a still camera. That is, $\left[R|t\right]$ translates coordinates of a point $\left( X, Y, Z \right)$ to some coordinate system, fixed with respect to the camera.
+
+$s$ and $\left( u, v \right)$ are known, and we want to know $\left( X, Y, Z \right)$. In order to calculate these, we have to find $A$ and $\left[R|t\right]$. In OpenCV, this is done by the function \verb|CalibrateCamera2|.
+
+\subsubsection{Implementation}
+\begin{figure}[H]
+\begin{lstlisting}
+CalibrateCamera2(objectPoints, imagePoints, pointCounts, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs, flags=0)
+\end{lstlisting}
+\caption{OpenCV camera calibration function}
+\label{code:calibratecamera2}
+\end{figure}
+
+Figure \ref{code:calibratecamera2} shows us the camera calibration function of OpenCV. It requires you to give the real world coordinates (\verb|objectPoints|) of some points in an image from the camera (\verb|imagePoints|). It provides you the intrinsic matrix (\verb|cameraMatrix|), the camera's distortion coefficients (\verb|distCoeffs|) and the rotation and translation vectors that translate a point in world coordinates to a point in a coordinate system that is fixed to the camera.
+
+The main challenge here is to find a good way to get the image and object points. Thanks to the fact that we \emph{are} able to get the raw infrared image from the Kinect (see section \ref{sec:mod_to_freenect}), we can use OpenCV's automatic chessboard recognition for both cameras. Using this, we find the image points.
+
+Since we know the properties of a checkerboard, we can also derive the object points:
+\[
+\left[ \begin{array}{ccc}
+\left(0, 0, 0\right), & \left(1, 0, 0\right), & ...,\\
+\left(0, 1, 0\right), & \left(1, 1, 0\right), & ...,\\
+..., & ..., & ...
+\end{array}\right]
+\]
+
+Now that we know the intrinsic matrices for both cameras, we can start looking for the rotation matrix and translation vector between the coordinate systems of both cameras. In OpenCV, this is done by the function \verb|StereoCalibrate| (see figure \ref{code:stereocalibrate}). 
+
+\begin{figure}[H]
+\begin{lstlisting}
+StereoCalibrate(objectPoints, imagePoints1, imagePoints2, pointCounts, cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, imageSize, R, T, E=None, F=None, term_crit=(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 30, 1e-6), flags=CV_CALIB_FIX_INTRINSIC)
+\end{lstlisting}
+\caption{OpenCV stereo calibration function}
+\label{code:stereocalibrate}
+\end{figure}
+
+Again, you need the object and image points from both cameras. You also need both cameras' intrinsic matrix and distortion coefficients. Just like we need, this function ouputs the rotation matrix and translation vector between the coordinate systems of both cameras. There is some other optional output, but we don't need that here.
+
+\subsubsection{Disclaimer}
+Despite all our hard work, we still can't find the right camera matrices nor the correct rotations between the coordinate spaces of both cameras. At first we thought something went wrong at the initialization of the object points, but it turned out this wasn't the problem. Also, the chessboard recognition works fine and finds the right image points. After spending two whole weekends on it, we gave up.
+
+%TODO: reference to http://nicolas.burrus.name/index.php/Research/KinectCalibration
+Luckily, this doesn't mean that we are stuck here. While wandering around on the internet, we found the matrices Nicolas Burrus has estimated for his Kinect. Although these matrices will differ slightly from our own, they turned out to give pretty good results (see also section \ref{sec:alignment}). We therefore decided to use these instead of our own.
+
+
+\subsection{Aligning depth and color images}
+
+\subsubsection{Rectification}
+
+\subsubsection{Alignment}
+\label{sec:alignment}
+
 
 \subsection{Creating a model}
 
