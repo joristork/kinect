@@ -132,6 +132,7 @@ using the similarity of triangles, which yields equation
 
 
 \subsection{Stereo triangulation: the Kinect way}
+\label{sub:atriang}
 
 Figure \ref{fig:atriang} shows the triangulation model adapted, \emph{mutatis
 mutandis}, to a depth camera ($c$) projector ($s$) pair. This is sometimes
@@ -187,10 +188,30 @@ obtain equation \ref{eq:atriang2}.
     Z_a = \frac{Z_r}{d_i \frac{Z_r}{(b f)} + 1}
 \end{equation}
 
+%todo: describe the issue of non-parallel cameras, epipolar lines, and how this
+%is solved with image transformations.
+
 \subsection{Correspondence problem}
 \label{sub:corr}
 
-In order to ca
+A key challenge to the active stereo triangulation method, described in sections
+\ref{sub:triang} and \ref{sub:atriang} above, is that of matching $x_a$ pixels
+in the depth camera images with the corresponding $x_r$ pixels in the reference
+image. In this section we highlight four different solutions to this
+``correspondence problem'': scale-invariant transformations; region growing;
+scale identification; and multiple reference images. In all cases the Kinect
+uses properties of the projected speckle pattern (shown in figure
+\ref{fig:pattern}) to match subregions of the recorded depth images with their
+counterparts in one or more ``reference'' images of the same pattern stored in
+non-volatile memory.
+
+\begin{figure}[ht]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{images/whole_pattern}        
+        \caption{Near-infrared image of speckle pattern}
+        \label{fig:pattern1}
+    \end{center}
+\end{figure}
 
 %todo describe experiment with pictures... 
 
