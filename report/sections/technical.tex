@@ -87,7 +87,6 @@ lesser extent, to our own experiments with the Kinect.
 Figure \ref{fig:triang} shows the idealised configuration of two cameras,
 $c_{l}$ and $c_{r}$, set up as a stereo unit, and a point, $p$, on an object
 viewed by both cameras. In this model, we simplify: 
-
 \begin{itemize}
 
     \item   the sensors as pinhole cameras;
@@ -109,7 +108,6 @@ viewed by both cameras. In this model, we simplify:
 
 The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x-y$ plane to
 $p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from: 
-
 \begin{itemize}
 
     \item the focal length ($f$);
@@ -124,7 +122,6 @@ $p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from:
 
 using the similarity of triangles, which yields equation
 \ref{eq:triang1}.
-
 %todo show algebra to derive this
 \begin{align} \label{eq:triang1}
     \frac{Z_p}{b} = \frac{Z_p - f}{b - x_l - x_r}
@@ -160,7 +157,6 @@ the $x$-axis in image space between the actual image of $p_a$ and the reference
 image of $p_r$. With that obtained, is it possible to derive the desired ``depth
 measurement'' for the given point, or the minimum distance from the depth
 camera's focal point to the object plane, from: 
-
 \begin{itemize}
 
     \item the focal length ($f$);
@@ -176,15 +172,13 @@ camera's focal point to the object plane, from:
 using the similarity of triangles, which yields equations \ref{eq:atriang1} and
 \ref{eq:atriang2}. Substituting for the common variable $d_o$, we simplify to
 obtain equation \ref{eq:atriang2}.
-
 %todo show algebra to derive this
 \begin{align} 
     \frac{d_o}{b} = \frac{Z_r - Z_a}{Z_r} \label{eq:atriang1}\\
     \frac{d_i}{f} = \frac{d_o}{Z_a} \label{eq:atriang2}
 \end{align}
-
 \begin{equation} \label{eq:atriang2}
-    Z_a = \frac{Z_r}{d_i \frac{Z_r}{(b f)} + 1}
+    Z_a = \frac{Z_r}{d_i \frac{Z_r}{b f} + 1}
 \end{equation}
 
 \subsection{Correspondence problem}
