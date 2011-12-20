@@ -106,8 +106,7 @@ viewed by both cameras. In this model, we simplify:
     \end{center}
 \end{figure}
 
-The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x-y$ plane to
-$p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from: 
+The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x$-$y$ plane to the plane parallel to the $x$-$y$ plane that contains $p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from: 
 \begin{itemize}
 
     \item the focal length ($f$);
@@ -119,14 +118,16 @@ $p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from:
     $x_{r}$),
 
 \end{itemize}
-
-using the similarity of triangles, which yields equation
-\ref{eq:triang1}.
+using the similarity of triangles, which yields
 %todo show algebra to derive this
-\begin{align} \label{eq:triang1}
-    \frac{Z_p}{b} = \frac{Z_p - f}{b - x_l + x_r}
-\end{align}
-
+\[
+    \frac{Z_p}{b} = \frac{Z_p - f}{b - x_l + x_r}.
+\]
+Hence,
+\[
+Z_p = \frac {bf}{x_r - x_l}.
+\]
+The value $x_r - x_l$ is called the ``disparity''.
 
 \subsection{Stereo triangulation: the Kinect way}
 
@@ -168,7 +169,6 @@ camera's focal point to the object plane, from:
     \item the reference image depth ($Z_r$),
 
 \end{itemize}
-
 using the similarity of triangles, which yields equations \ref{eq:atriang1} and
 \ref{eq:atriang2}. Substituting for the common variable $d_o$, we simplify to
 obtain equation \ref{eq:atriang2}.
