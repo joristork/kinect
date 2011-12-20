@@ -86,12 +86,8 @@ lesser extent, to our own experiments with the Kinect.
 
 Figure \ref{fig:triang} shows the idealised configuration of two cameras,
 $c_{l}$ and $c_{r}$, set up as a stereo unit, and a point, $p$, on an object
-<<<<<<< HEAD
 viewed by both cameras. In this model, we simplify: 
 
-=======
-viewed by both cameras.  In this model, we simplify: 
->>>>>>> 4665d18e08955c64e643b32f5e4a36faff8cfdf5
 \begin{itemize}
 
     \item   the sensors as pinhole cameras;
@@ -126,11 +122,10 @@ $p$. We obtain $Z_{p}$ from:
 \end{itemize}
 
 using the similarity of triangles, which yields equation
-\ref{eqn:triang1}.
+\ref{eq:triang1}.
 
 %todo show algebra to derive this
-\begin{align}
-    \label{eqn:triang1}
+\begin{align} \label{eq:triang1}
     \frac{Z_p}{b} = \frac{Z_p - f}{b - x_l - x_r}
 \end{align}
 
@@ -153,12 +148,14 @@ plane from the corresponding point ($p_r$) on a predetermined reference plane.
     \end{center}
 \end{figure}
 
+%todo uhm, notation for lines, again?
 Now it is worth emphasising the order in which the Kinect proceeds: First, for
 every point ($p_a$) in the depth image, it finds the matching point ($p_r$) in
 the reference image by solving the so-called ``correspondence problem''
 discussed in section \ref{sub:corr}. Once the $p_r$ in question is known, $p_a$
 is determined as the intersection of the $(p_r,s)$ and $(c,x)$ lines, where $x$
-is the target pixel on the image plane. Then it is again possible to derive the desired depth value, $Z_a$, from:
+is the target pixel on the image plane. Then it is again possible to derive the
+desired depth value, $Z_a$, from:
 
 \begin{itemize}
 
@@ -166,21 +163,22 @@ is the target pixel on the image plane. Then it is again possible to derive the 
 
     \item the inter-camera distance ($b$);
 
-    \item the distance between $x$ and the pixel corresponding to $p_r$ on the image plane ($d_i$);
+    \item the distance between $x$ and the pixel corresponding to $p_r$ on the
+    image plane ($d_i$);
 
-    \item the distance between $p_a$ and the intersection of the $(c,p_r)$ point with the object plane ($d_o$); and
+    \item the distance between $p_a$ and the intersection of the $(c,p_r)$ point
+    with the object plane ($d_o$); and
 
     \item the reference image depth ($Z_r$),
 
 \end{itemize}
 
-using the similarity of triangles, which yields the equation \ref{eqn:atriang1}.
+using the similarity of triangles, which yields the equation \ref{eq:atriang1}.
 
 %todo show algebra to derive this
-\begin{align}
-    \label{eqn:atriang1}
+\begin{equation} \label{eq:atriang1}
     Z_a = \frac{Z_r}{d \frac{Z_r}{(b f)} + 1}
-\end{align}
+\end{equation}
 
 
 \subsubsection{Experiment: pattern variation over distance}
