@@ -374,10 +374,9 @@ returns a rotation matrix vector and a translation vector. A rotation matrix is
 derived from the rotation vector using the \texttt{rodrigues2} function in
 OpenCV. Then, the extrinsic matrix is derived from the translation vector. 
 
-The resulting information can be inserted in the equation:\\
+The resulting information can be inserted in the equation \label{eq:pipeline}.\\
 \begin{figure}
 \label{eq:pipeline}
-\end{figure}
 \begin{equation}
 s \left[ \begin{array}{ccc} 
 u\\
@@ -398,6 +397,7 @@ z\\
 1  \end{array} \right] 
 .
 \end{equation}
+\end{figure}
 In this equation,
 $$
 \left[ \begin{array}{ccc} 
@@ -430,22 +430,45 @@ r_{31} & r_{32} & r_{33} & t_{3}
 $$
 is the extrinsic matrix \cite{OPENCV}.
 
-Now, since it has to be performed for every coordinate, calculating $s$ becomes
-a costly operation. For all points in the object space, equation \ref{eq:pipeline} determines:
-$$
+At this point, we can take the depth value at every point in the depth image for
+the $s$ value in the above equation. So $s = d(u,v)$. At this point, we know
+the vector $$
 \left[ \begin{array}{ccc} 
 u s\\
 v s\\
 s \end{array} \right].
+$$ for every point in the depth image and for every point in the rgb image. We 
+can now translate it to $(x,y,z)$ coordinates in our object space with the 
+following equation:
 $$
-
-Dividing by $s$ then yields the corresponding coordinate in the depth image.
-Now, back to the four manually selected points: Every point has a corresponding
-depth value in the depth image. The application selects the maximum and minimum
-depth values for the four manually selected points, and stores them as boundary
-values. For every point within the cube we check if the corresponding value in
-the depth image is between the interpolated boundaries. If so we pass the 3d
-point to the point cloud viewer. 
+\left[ \begin{array}{c} 
+x\\
+y\\
+z\\
+1  \end{array} \right] 
+=
+\left[ \begin{array}{ccc} 
+r_{11} & r_{12} & r_{13}\\
+r_{21} & r_{22} & r_{23}\\
+r_{31} & r_{32} & r_{33}
+\end{array} \right]^{-1}
+\left[ \begin{array}{c} 
+u s\\
+v s\\
+s \end{array} \right]
+-
+\left[ \begin{array}{c} 
+t_{1}\\
+t_{2}\\
+t_{3}
+\end{array} \right]
+$$
+We can now pass all (x,y,z) coordinates to the point cload viewer, including 
+the corresponding color value. \\
+\\
+As you might have noticed, the intrinsic matrix isn't used in the last equation.
+This is because (as we mentioned earlier) the images were already undistorted
+and rectified.
 
 \subsubsection{Defects and todo}
 
