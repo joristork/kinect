@@ -47,8 +47,8 @@ def runloop(depth=None, video=None, body=None, vmode=VIDEO_RGB):
 \label{sec:stereo_calibrate}
 
 \subsubsection{Theory}
-% TODO: reference to http://opencv.willowgarage.com/documentation/python/camera_calibration_and_3d_reconstruction.html
-For the calibration of the Kinect cameras we use the pinhole camera model:
+% reference to http://opencv.willowgarage.com/documentation/python/camera_calibration_and_3d_reconstruction.html
+For the calibration of the Kinect cameras we use the pinhole camera model \cite{OPENCV}:
 \[
 s m' = A \left[R|t\right]M'
 \]
@@ -138,8 +138,8 @@ Again, you need the object and image points from both cameras. You also need bot
 \subsubsection{Disclaimer}
 Despite all our hard work, we still can't find the right camera matrices nor the correct rotations between the coordinate spaces of both cameras. At first we thought something went wrong at the initialization of the object points, but it turned out this wasn't the problem. Also, the chessboard recognition works fine and finds the right image points. After spending two whole weekends on it, we gave up.
 
-%TODO: reference to http://nicolas.burrus.name/index.php/Research/KinectCalibration
-Luckily, this doesn't mean that we are stuck here. While wandering around on the internet, we found the matrices Nicolas Burrus has estimated for his Kinect. Although these matrices will differ slightly from our own, they turned out to give pretty good results (see also section \ref{sec:alignment}). We therefore decided to use these instead of our own.
+%reference to http://nicolas.burrus.name/index.php/Research/KinectCalibration
+Luckily, this doesn't mean that we are stuck here. While wandering around on the internet, we found the matrices Nicolas Burrus has estimated for his Kinect \cite{RGBDEMO}. Although these matrices will differ slightly from our own, they turned out to give pretty good results (see also section \ref{sec:alignment}). We therefore decided to use these instead of our own.
 
 
 \subsection{Aligning depth and color images}
@@ -227,8 +227,8 @@ Given a source image (\verb|src|) and a map matrix (\verb|mapMatrix|, we use \ve
 
 
 \subsection{Getting the `real' depth}
-The Kinect's depth output is not on a linear scale. Therefore, if we want to create a 3D object scanner, we have to convert the depth to a linear scale. Because of the short range of the Kinect, we chose to use centimeters as this scale. We found the following formula:
-
+The Kinect's depth output is not on a linear scale. Therefore, if we want to create a 3D object scanner, we have to convert the depth to a linear scale. Because of the short range of the Kinect, we chose to use centimeters as this scale. We found the following formula \cite{MAGNENAT}:
+\newpage
 \begin{lstlisting}
 def depth_to_centimeters(d):
     if d < 2047:
@@ -236,7 +236,7 @@ def depth_to_centimeters(d):
     else:
         return -1.0
 \end{lstlisting}
-%TODO add reference to http://groups.google.com/group/openkinect/browse_thread/thread/31351846fd33c78/e98a94ac605b9f21?lnk=gst&q=stephane#e98a94ac605b9f21
+%reference to http://groups.google.com/group/openkinect/browse_thread/thread/31351846fd33c78/e98a94ac605b9f21?lnk=gst&q=stephane#e98a94ac605b9f21
 This function was provided by Dr. St\'ephane Magnenat, but was never derived nor proven. A few tests however showed that it is quite a good approximation.
 
 What may seem odd here is the \verb|if d < 2047| statement, but it isn't. The depth value the kinect returns when it cannot find the depth for a certain point (e.g. when the point is too far away) is 2047. Since we don't want this point to be in our 3D space, we remove it.
