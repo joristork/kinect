@@ -135,9 +135,8 @@ In this model, we simplify: \begin{itemize}
     \end{center}
 \end{figure}
 
-The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x-y$ plane to
-$p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from: 
-
+The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x$-$y$ plane to the plane parallel to the $x$-$y$ plane that contains $p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from: 
+%The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x-y$ plane to $p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from: 
 \begin{itemize}
 
     \item the focal length ($f$);
@@ -248,8 +247,8 @@ In order to recognise matching subregions across the actual and reference
 speckle pattern images, the Kinect must overcome the fact that the scale of the
 patterns varies with depth. One approach to dealing with this, is to match
 scale-invariant representations of the respective sets of subregions. A class of
-transformation functions, the Mellin transform(ref), is widely used in computer
-vision to create such scale-invariant representations of an image. Much as the
+transformation functions, the Mellin transform, is widely used in computer
+vision to create such scale-invariant representations of an image \cite{casasent1977new}. Much as the
 Fourier transform of a function does not vary as one shifts that function along
 its domain, the Mellin transform of a function equals the Mellin transform of a
 scaled version of that function (c.f.\ (strongly simplified)
