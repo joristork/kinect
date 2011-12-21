@@ -13,11 +13,15 @@ breakatwhitespace=false,        % sets if automatic breaks should only happen at
 }
 
 
-\section{Components}
+The following description of our Kinect-based 3-D modelling application roughly
+follows the application pipeline, from our modified version of the Freenect
+software drivers, through to the 3D point cloud viewer and our approach to
+integrating the various application components we created. In line with the
+available open-source software drivers and the personal preferences of the
+majority of our team, the application is written in Python.
 
-What follows is a listing of application components.
 
-\subsection{Modifications to Freenect}
+\section{Modifications to Freenect}
 \label{sec:mod_to_freenect}
 
 The Freenect driver supports getting the raw camera output of the infrared camera. The python wrapper of Freenect however, doesn't provide an easy way to do this. Out of the box, the wrapper provides us a function \verb|runloop| (see figure \ref{code:def_runloop}).
@@ -43,7 +47,7 @@ def runloop(depth=None, video=None, body=None, vmode=VIDEO_RGB):
 \end{figure}
 
 
-\subsection{Stereo Calibrate}
+\section{Stereo Calibrate}
 \label{sec:stereo_calibrate}
 
 \subsubsection{Theory}
@@ -142,7 +146,7 @@ Despite all our hard work, we still can't find the right camera matrices nor the
 Luckily, this doesn't mean that we are stuck here. While wandering around on the internet, we found the matrices Nicolas Burrus has estimated for his Kinect \cite{RGBDEMO}. Although these matrices will differ slightly from our own, they turned out to give pretty good results (see also section \ref{sec:alignment}). We therefore decided to use these instead of our own.
 
 
-\subsection{Aligning depth and color images}
+\section{Aligning depth and color images}
 
 \subsubsection{Rectification}
 In order to align the depth image with the color image from the Kinect, these images first need to be rectified. Rectification is the process that reprojects image planes so that they reside in
@@ -226,7 +230,7 @@ Given a source image (\verb|src|) and a map matrix (\verb|mapMatrix|, we use \ve
 \end{figure}
 
 
-\subsection{Getting the `real' depth}
+\section{Getting the `real' depth}
 The Kinect's depth output is not on a linear scale. Therefore, if we want to create a 3D object scanner, we have to convert the depth to a linear scale. Because of the short range of the Kinect, we chose to use centimeters as this scale. We found the following formula \cite{MAGNENAT}:
 \newpage
 \begin{lstlisting}
@@ -241,7 +245,7 @@ This function was provided by Dr. St\'ephane Magnenat, but was never derived nor
 
 What may seem odd here is the \verb|if d < 2047| statement, but it isn't. The depth value the kinect returns when it cannot find the depth for a certain point (e.g. when the point is too far away) is 2047. Since we don't want this point to be in our 3D space, we remove it.
 
-\subsection{Creating a model}
+\section{Creating a model}
 
 \subsubsection{The algorithm}
 
@@ -500,7 +504,7 @@ Todo:
 
 \end{itemize}
 
-\subsection{Point Cloud Viewer}
+\section{Point Cloud Viewer}
 
 The point cloud viewer was developed after examining various possible
 bases, such as: PCL(see pointclouds.org, A very large production-class project for
@@ -537,7 +541,7 @@ is done quickly and easily using the 'c' key.
 
 The low-level interface includes the option for depth smoothing.
 
-\subsection{Combining it all}
+\section{Combining it all}
 
 % in para below: "from files" = the matrices or the images?
 
