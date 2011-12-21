@@ -334,7 +334,7 @@ field's black corner
 
 \end{itemize}
 
-The result is visualized in figure \ref{fig:axis}. \\
+The result is visualized in figure \ref{fig:axis}.
 
 \begin{figure}[H]
 \centering
@@ -345,7 +345,7 @@ The result is visualized in figure \ref{fig:axis}. \\
 
 The cube's dimensions are then normalised to $100$ respectively in the $x$ and
 $y$ directions, and $141$ for the $z$ direction. The last dimension is the value
-of $100 * \sqrt(2)$, which in turn is the length to width ratio of an A3 sheet.
+of $100\sqrt 2$, which in turn is the length to width ratio of an A3 sheet.
 The manually selected points can now be translated to object space coordinates
 as follows:
 $$
@@ -374,17 +374,15 @@ returns a rotation matrix vector and a translation vector. A rotation matrix is
 derived from the rotation vector using the \texttt{rodrigues2} function in
 OpenCV. Then, the extrinsic matrix is derived from the translation vector. 
 
-The resulting information can be inserted in the equation \label{eq:pipeline}.\\
-\begin{figure}
-\label{eq:pipeline}
-\begin{equation}
+The resulting information can be inserted in the following equation:
+\begin{equation}\label{eq:pipeline}
 s \left[ \begin{array}{ccc} 
 u\\
 v\\
 1 \end{array} \right] = 
 \left[ \begin{array}{ccc} 
 f_{x} & 0 & c_{x}\\
-0 & f_{y} & x_{y}\\
+0 & f_{y} & c_{y}\\
 0 & 0 & 1 \end{array} \right] 
 \left[ \begin{array}{cccc} 
 r_{11} & r_{12} & r_{13} & t_{1}\\
@@ -397,7 +395,6 @@ z\\
 1  \end{array} \right] 
 .
 \end{equation}
-\end{figure}
 In this equation,
 $$
 \left[ \begin{array}{ccc} 
@@ -444,8 +441,7 @@ $$
 \left[ \begin{array}{c} 
 x\\
 y\\
-z\\
-1  \end{array} \right] 
+z\end{array} \right] 
 =
 \left[ \begin{array}{ccc} 
 r_{11} & r_{12} & r_{13}\\
