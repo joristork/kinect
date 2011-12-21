@@ -334,7 +334,7 @@ field's black corner
 
 \end{itemize}
 
-The result is visualized in figure \ref{fig:axis}. \\
+The result is visualized in figure \ref{fig:axis}.
 
 \begin{figure}[H]
 \centering
@@ -345,7 +345,7 @@ The result is visualized in figure \ref{fig:axis}. \\
 
 The cube's dimensions are then normalised to $100$ respectively in the $x$ and
 $y$ directions, and $141$ for the $z$ direction. The last dimension is the value
-of $100 * \sqrt(2)$, which in turn is the length to width ratio of an A3 sheet.
+of $100\sqrt 2$, which in turn is the length to width ratio of an A3 sheet.
 The manually selected points can now be translated to object space coordinates
 as follows:
 $$
@@ -374,10 +374,8 @@ returns a rotation matrix vector and a translation vector. A rotation matrix is
 derived from the rotation vector using the \texttt{rodrigues2} function in
 OpenCV. Then, the extrinsic matrix is derived from the translation vector. 
 
-The resulting information can be inserted in the equation \label{eq:pipeline}.\\
-\begin{figure}
-\label{eq:pipeline}
-\begin{equation}
+The resulting information can be inserted in the following equation:
+\begin{equation}\label{eq:pipeline}
 s \left[ \begin{array}{ccc} 
 u\\
 v\\
@@ -397,7 +395,6 @@ z\\
 1  \end{array} \right] 
 .
 \end{equation}
-\end{figure}
 In this equation,
 $$
 \left[ \begin{array}{ccc} 
