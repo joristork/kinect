@@ -14,9 +14,9 @@ breakatwhitespace=false,        % sets if automatic breaks should only happen at
 
 
 The following description of our Kinect-based 3-D modelling application roughly
-follows the application pipeline, from our modified version of the Freenect
-software drivers, through to the 3D point cloud viewer and our approach to
-integrating the various application components we created. In line with the
+follows the application pipeline. It runs from our modified version of the
+Freenect software drivers, through to the 3D point cloud viewer and our approach
+to integrating the various components of our application. In line with the
 available open-source software drivers and the personal preferences of the
 majority of our team, the application is written in Python.
 
@@ -24,7 +24,10 @@ majority of our team, the application is written in Python.
 \section{Modifications to Freenect}
 \label{sec:mod_to_freenect}
 
-The Freenect driver supports getting the raw camera output of the infrared camera. The python wrapper of Freenect however, doesn't provide an easy way to do this. Out of the box, the wrapper provides us a function \verb|runloop| (see figure \ref{code:def_runloop}).
+The Freenect driver supports getting the raw camera output of the infrared
+camera. The python wrapper for Freenect however, doesn't provide an easy way to
+do this. Out of the box, the wrapper provides a function \verb|runloop| (see
+figure \ref{code:def_runloop}).
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -35,7 +38,15 @@ def runloop(depth=None, video=None, body=None):
 \label{code:def_runloop}
 \end{figure}
 
-In short, this function initializes the Kinect and starts running a loop in which the Kinect's depth and RGB images are processed. However, the initialization step is static. It always uses the medium quality RGB video mode and the 11-bit depth mode. Since Freenect only supports getting the infrared image as a video mode, we added an optional flag \verb|vmode| to the function (see figure \ref{code:mod_runloop}). By adjusting this value, you can now choose whether you want to see the RGB output or the raw infrared output of the Kinect. To provide backwards compatibility, the default value of this flag is still \verb|VIDEO_RGB|.
+In short, this function initializes the Kinect and starts running a loop in
+which the Kinect's depth and RGB images are processed. However, the
+initialization step is static. It always uses the medium quality RGB video mode
+and the 11-bit depth mode. Since Freenect only supports getting the infrared
+image as a video mode stream, we added an optional flag \verb|vmode| to the
+function (see figure \ref{code:mod_runloop}). By adjusting this value, you can
+now choose whether you want to see the RGB output or the raw infrared output of
+the Kinect. To provide backwards compatibility, the default value of this flag
+is still \verb|VIDEO_RGB|.
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -83,13 +94,25 @@ Z\\
 \end{array} \right]
 \]
 
-Here, $\left( X, Y, Z \right)$ are the coordinates of a 3D point in the world coordinate space, $\left( u, v \right)$ are the coordinates of the projection point in pixels.
+Here, $\left( X, Y, Z \right)$ are the coordinates of a 3D point in the world
+coordinate space, and $\left( u, v \right)$ are the coordinates of the
+projection point in pixels.
 
-$A$ is called the camera matrix or intrinsic matrix. $\left( c_x, c_y \right)$ give a principal point (that is usually at the image center) and $\left( f_x, f_y \right)$ are the focal lengths of the camera, expressed in pixel-related units.
+$A$ is called the camera matrix or intrinsic matrix. $\left( c_x, c_y \right)$
+give a principal point (that is usually at the image center) and $\left( f_x,
+f_y \right)$ are the focal lengths of the camera, expressed in pixel-related
+units.
 
-$\left[R|t\right]$ is called the extrinsic matrix. It is used to describe the camera motion around a static scene, or vice versa, rigid motion of an object in front of a still camera. That is, $\left[R|t\right]$ translates coordinates of a point $\left( X, Y, Z \right)$ to some coordinate system, fixed with respect to the camera.
+$\left[R|t\right]$ is called the extrinsic matrix. It is used to describe the
+camera motion around a static scene, or conversely, the rigid motion of an
+object in front of a still camera. That is, $\left[R|t\right]$ translates the
+coordinates of a point $\left( X, Y, Z \right)$ to some coordinate system, fixed
+with respect to the camera.
 
-$s$ and $\left( u, v \right)$ are known, and we want to know $\left( X, Y, Z \right)$. In order to calculate these, we have to find $A$ and $\left[R|t\right]$. In OpenCV, this is done by the function \verb|CalibrateCamera2|.
+$s$ and $\left( u, v \right)$ are known, and we want to know $\left( X, Y, Z
+\right)$. In order to calculate these, we have to find $A$ and
+$\left[R|t\right]$. In OpenCV, this is done with the function
+\verb|CalibrateCamera2|.
 
 \subsubsection{Implementation}
 \begin{figure}[H]
@@ -100,7 +123,13 @@ CalibrateCamera2(objectPoints, imagePoints, pointCounts, imageSize, cameraMatrix
 \label{code:calibratecamera2}
 \end{figure}
 
-Figure \ref{code:calibratecamera2} shows us the camera calibration function of OpenCV. It requires you to give the real world coordinates (\verb|objectPoints|) of some points in an image from the camera (\verb|imagePoints|). It provides you the intrinsic matrix (\verb|cameraMatrix|), the camera's distortion coefficients (\verb|distCoeffs|) and the rotation and translation vectors that translate a point in world coordinates to a point in a coordinate system that is fixed to the camera.
+Figure \ref{code:calibratecamera2} shows us the camera calibration function of
+OpenCV. It requires the real world coordinates (\verb|objectPoints|) of some
+points in an image from the camera (\verb|imagePoints|). It returns the
+intrinsic matrix (\verb|cameraMatrix|), the camera's distortion coefficients
+(\verb|distCoeffs|) and the rotation and translation vectors that translate a
+point in world coordinates to a point in a coordinate system that is fixed to
+the camera.
 
 \begin{figure}[H]
 \centering
@@ -109,9 +138,16 @@ Figure \ref{code:calibratecamera2} shows us the camera calibration function of O
 \label{fig:calibrating}
 \end{figure}
 
-The main challenge here is to find a good way to get the image and object points. Thanks to the fact that we \emph{are} able to get the raw infrared image from the Kinect (see section \ref{sec:mod_to_freenect}), we can use OpenCV's automatic chessboard recognition for both cameras. The Kinect's dot pattern however distorts the infrared image. Therefore, the infrared projector should be covered when calibrating (like in figure \ref{fig:calibrating}).  Using this, we find the image points.
+The main challenge here is to find a good way to get the image and object
+points. Thanks to the fact that we \emph{are} able to get the raw infrared image
+from the Kinect (see section \ref{sec:mod_to_freenect}), we can use OpenCV's
+automatic chessboard recognition for both cameras. The Kinect's dot pattern
+however distorts the infrared image. Therefore, the infrared projector should be
+covered when calibrating (like in figure \ref{fig:calibrating}). Using this, we
+find the image points.
 
-Since we know the properties of a checkerboard, we can also derive the object points:
+Since we know the properties of the checkerboard, we can also derive the object
+points:
 \[
 \left[ \begin{array}{ccc}
 \left(0, 0, 0\right), & \left(1, 0, 0\right), & ...,\\
@@ -127,7 +163,12 @@ Since we know the properties of a checkerboard, we can also derive the object po
 \label{fig:chessboard}
 \end{figure}
 
-As can be seen in figure \ref{fig:chessboard}, the chessboard corners are easily found. From this, the intrinsic matrices will be generated. Now that we know the intrinsic matrices for both cameras, we can start looking for the rotation matrix and translation vector between the coordinate systems of both cameras. In OpenCV, this is done by the function \verb|StereoCalibrate| (see figure \ref{code:stereocalibrate}). 
+As can be seen in figure \ref{fig:chessboard}, the chessboard corners are easily
+found. From this, the intrinsic matrices will be generated. Now that we know the
+intrinsic matrices for both cameras, we can start looking for the rotation
+matrix and translation vector between the coordinate systems of both cameras. In
+OpenCV, this is done by the function \verb|StereoCalibrate| (see figure
+\ref{code:stereocalibrate}). 
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -137,20 +178,37 @@ StereoCalibrate(objectPoints, imagePoints1, imagePoints2, pointCounts, cameraMat
 \label{code:stereocalibrate}
 \end{figure}
 
-Again, you need the object and image points from both cameras. You also need both cameras' intrinsic matrix and distortion coefficients. Just like we need, this function ouputs the rotation matrix and translation vector between the coordinate systems of both cameras. There is some other optional output, but we don't need that here.
+Again, one needs the object and image points from both cameras. One also need
+both cameras' intrinsic matrix and distortion coefficients. This function ouputs
+the needed rotation matrix and translation vector between the coordinate systems
+of both cameras. There is some other optional output, but we don't need that
+here.
 
 \subsubsection{Disclaimer}
-Despite all our hard work, we still can't find the right camera matrices nor the correct rotations between the coordinate spaces of both cameras. At first we thought something went wrong at the initialization of the object points, but it turned out this wasn't the problem. Also, the chessboard recognition works fine and finds the right image points. After spending two whole weekends on it, we gave up.
+
+Despite our best efforts, we still cannot find the right camera matrices nor the
+correct rotations between the coordinate spaces of both cameras. At first we
+thought something went wrong at the initialization of the object points, but
+this turned not to be the problem. Also, the chessboard recognition works fine
+and finds the right image points. 
 
 %reference to http://nicolas.burrus.name/index.php/Research/KinectCalibration
-Luckily, this doesn't mean that we are stuck here. While wandering around on the internet, we found the matrices Nicolas Burrus has estimated for his Kinect \cite{RGBDEMO}. Although these matrices will differ slightly from our own, they turned out to give pretty good results (see also section \ref{sec:alignment}). We therefore decided to use these instead of our own.
+Luckily, this doesn't mean that we are stuck here. While wandering around on the
+internet, we found the matrices Nicolas Burrus has estimated for his Kinect
+\cite{RGBDEMO}. Although these matrices will differ slightly from our own, they
+turned out to give pretty good results (see also section \ref{sec:alignment}).
+We therefore decided to use these instead of our own.
 
 
-\section{Aligning depth and color images}
+\section{Aligning depth and colour images}
 
 \subsubsection{Rectification}
-In order to align the depth image with the color image from the Kinect, these images first need to be rectified. Rectification is the process that reprojects image planes so that they reside in
-the exact same plane and their epipolar lines become parallel. In OpenCV, you need three functions to rectify an image. The first one is \verb|StereoRectify| (see figure \ref{code:stereorectify}).
+
+In order to align the depth image with the colour image from the Kinect, these
+images first need to be rectified. Rectification is the process that reprojects
+image planes so that they reside in the exact same plane and their epipolar
+lines become parallel. In OpenCV, you need three functions to rectify an image.
+The first one is \verb|StereoRectify| (see figure \ref{code:stereorectify}).
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -160,7 +218,14 @@ StereoRectify(cameraMatrix1, cameraMatrix2, distCoeffs1, distCoeffs2, imageSize,
 \label{code:stereorectify}
 \end{figure}
 
-In order to call this function, you need the camera matrices and distortion coefficients as well as the rotation matrix and the translation vector between those cameras. These were derived in the calibration step (see section \ref{sec:stereo_calibrate}). The function finally returns four matrices: R1, R2, P1 and P2. R1 and R2 are the rectification transforms for the first and second camera, respectively. P1 and P2 are the projection matrices in the new rectified coordinate systems. These four matrices can be used in the next step: \verb|InitUndistortRectifyMap| (see figure \ref{code:initrecmap}).
+In order to call this function, one needs the camera matrices and distortion
+coefficients as well as the rotation matrix and the translation vector between
+those cameras. These were derived in the calibration step (see section
+\ref{sec:stereo_calibrate}). The function returns four matrices: R1, R2, P1 and
+P2. R1 and R2 are the rectification transforms for the first and second camera,
+respectively. P1 and P2 are the projection matrices in the new rectified
+coordinate systems. These four matrices can be used in the next step:
+\verb|InitUndistortRectifyMap| (see figure \ref{code:initrecmap}).
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -170,7 +235,12 @@ InitUndistortRectifyMap(cameraMatrix, distCoeffs, R, P, mapx, mapy)
 \label{code:initrecmap}
 \end{figure}
 
-As you can see, this function only takes one camera matrix, one set of distortion coefficients, etcetera. This indicates that we have to call this function twice: once for the depth image and once for the color image. The function returns two maps, \verb|mapx| and \verb|mapy|, that map the pixels of an image to the right position in the rectified image. This mapping process is done in the final step of rectification: \verb|Remap| (see figure \ref{code:remap}).
+As you can see, this function only takes one camera matrix, one set of
+distortion coefficients, etc. This indicates that we have to call this function
+twice: once for the depth image and once for the colour image. The function
+returns two maps, \verb|mapx| and \verb|mapy|, that map the pixels of an image
+to the right position in the rectified image. This mapping process is done in
+the final step of rectification: \verb|Remap| (see figure \ref{code:remap}).
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -180,12 +250,15 @@ Remap(src, dst, mapx, mapy, flags=CV_INNER_LINEAR+CV_WARP_FILL_OUTLIERS, fillval
 \label{code:remap}
 \end{figure}
 
-When we provide this function with a non-rectified image (\verb|src|) and two maps (\verb|mapx| and \verb|mapy|), these maps are applied to the image. The resulting image (\verb|dist|) will now be the rectified image we've been looking for (e.g. figure \ref{fig:rectify}).
+When provide this function with a non-rectified image (\verb|src|) and two maps
+(\verb|mapx| and \verb|mapy|), these maps are applied to the image. The
+resulting image (\verb|dist|) will now be the rectified image we've been looking
+for (e.g. figure \ref{fig:rectify}).
 
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.6]{images/rectify.png}
-\caption{Raw (left) and rectified (right) color image}
+\caption{Raw (left) and rectified (right) colour image}
 \label{fig:rectify}
 \end{figure}
 
@@ -200,7 +273,21 @@ When we provide this function with a non-rectified image (\verb|src|) and two ma
 \label{fig:homography}
 \end{figure}
 
-Now that we've rectified both images, we just have to translate them so that they're completely aligned (i.e., a pixel $\left(x, y\right)$ in the color image is the same pixel at $\left(x, y\right)$ in the depth image). This final translation could be found by just finding one corresponding point in each image, but to minimize distortion, we've decided to, again, use chessboard recognition. Since we still have the images of both the depth and the color camera at calibration time, we can reuse those. After rectifying them, we can create a collection of chessboard corners in the rectified images. Since we use multiple points, we can't use \verb|GetAffineTransform| (max. 3 points) or \verb|GetPerspectiveTransform| (max. 4 points), but we have to use \verb|FindHomography| (see figure \ref{code:findhomography}). As you can see in figure \ref{fig:homography}, this process doesn't always end well. When we use our own derived camera matrices, the process fails, since the rectification matrices are wrong. Otherwise, when we use Nicolas Burrus' matrices, the process ends well. More about this can be found in section \ref{sec:stereo_calibrate}.
+Now that we have rectified both images, we need to translate them so that they
+are completely aligned (i.e.\ , a pixel $\left(x, y\right)$ in the colour image
+is the same pixel at $\left(x, y\right)$ in the depth image). This final
+translation could be obtained by finding one corresponding point in each image,
+but to minimize distortion, we have decided again to use chessboard recognition.
+Since we still have the images of both the depth and the colour camera at
+calibration time, we can reuse those. After rectifying them, we can create a
+collection of chessboard corners in the rectified images. Since we use multiple
+points, we cannot use \verb|GetAffineTransform| (max. 3 points) or
+\verb|GetPerspectiveTransform| (max. 4 points). Instead we use
+\verb|FindHomography| (see figure \ref{code:findhomography}). As you can see in
+figure \ref{fig:homography}, this process doesn't always end well. With our own
+derived camera matrices, the process fails, since the rectification matrices are
+wrong. With Nicolas Burrus' matrices, the process ends well. More about this
+can be found in section \ref{sec:stereo_calibrate}.
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -210,7 +297,12 @@ FindHomography(srcPoints, dstPoints, H, method=CV_RANSAC, ransacReprojThreshold=
 \label{code:findhomography}
 \end{figure}
 
-Here, \verb|scrPoints| is the collection of chessboard corners in the rectified depth images, \verb|dstPoints| the collection of chessboard points in the rectified rgb images. The homography matrix (\verb|H|) gives us the final translation between the color and depth images. All we need to do now is apply this translation to the depth image. This can be done by the OpenCV function \verb|WarpPerspective| (see figure \ref{code:warpperspective}).
+Here, \verb|scrPoints| is the collection of chessboard corners in the rectified
+depth images, and \verb|dstPoints| is the collection of chessboard points in the
+rectified rgb images. The homography matrix (\verb|H|) provides the final
+translation between the colour and depth images. All we need to do now is apply
+this translation to the depth image. This can be done with the OpenCV function
+\verb|WarpPerspective| (see figure \ref{code:warpperspective}).
 
 \begin{figure}[H]
 \begin{lstlisting}
@@ -220,7 +312,10 @@ WarpPerspective(src, dst, mapMatrix, flags=CV_INNER_LINEAR+CV_WARP_FILL_OUTLIERS
 \label{code:warpperspective}
 \end{figure}
 
-Given a source image (\verb|src|) and a map matrix (\verb|mapMatrix|, we use \verb|H| here), this function gives the resulting image of applying that matrix to the image (\verb|dst|). In figure \ref{fig:aligned}, you can see that the aligned images overlay perfectly.
+Given a source image (\verb|src|) and a map matrix (\verb|mapMatrix|, we use
+\verb|H| here), this function gives the resulting image of applying that matrix
+to the image (\verb|dst|). In figure \ref{fig:aligned}, you can see that the
+aligned images overlay perfectly.
 
 \begin{figure}[H]
 \centering
@@ -231,8 +326,13 @@ Given a source image (\verb|src|) and a map matrix (\verb|mapMatrix|, we use \ve
 
 
 \section{Getting the `real' depth}
-The Kinect's depth output is not on a linear scale. Therefore, if we want to create a 3D object scanner, we have to convert the depth to a linear scale. Because of the short range of the Kinect, we chose to use centimeters as this scale. We found the following formula \cite{MAGNENAT}:
-\newpage
+
+The Kinect's depth output is not on a linear scale. Therefore, if we want to
+create a 3D object scanner, we have to convert the depth to a linear scale.
+Because of the Kinect's short range, we express resulting depth values in
+centimeters.  We found the following algorithm to perform the conversion
+\cite{MAGNENAT}:
+
 \begin{lstlisting}
 def depth_to_centimeters(d):
     if d < 2047:
@@ -241,9 +341,14 @@ def depth_to_centimeters(d):
         return -1.0
 \end{lstlisting}
 %reference to http://groups.google.com/group/openkinect/browse_thread/thread/31351846fd33c78/e98a94ac605b9f21?lnk=gst&q=stephane#e98a94ac605b9f21
-This function was provided by Dr. St\'ephane Magnenat, but was never derived nor proven. A few tests however showed that it is quite a good approximation.
 
-What may seem odd here is the \verb|if d < 2047| statement, but it isn't. The depth value the kinect returns when it cannot find the depth for a certain point (e.g. when the point is too far away) is 2047. Since we don't want this point to be in our 3D space, we remove it.
+This function was provided by Dr. St\'ephane Magnenat, but was neither derived
+nor proven. A few tests however showed that it is quite a good approximation.
+
+What may seem odd here is the \verb|if d < 2047| statement, but it isn't. The
+depth value the kinect returns when it cannot find the depth for a certain point
+(e.g. when the point is too far away) is 2047. Since we don't want this point to
+be in our 3D space, we remove it.
 
 \section{Creating a model}
 
@@ -263,12 +368,13 @@ function from OpenCV.
 With the two image streams pre-processed, the application proceeds to build the
 model. The first step is to determine the ``working field''. This is done with
 an A3-size sheet of white paper placed on a flat surface. The corners of the
-sheet are colored (in order) green, blue, red and black.
+sheet are coloured (in order) green, blue, red and black.
 
 For now, the application requires users to manually determine the orientation of
 the working field. The \texttt{create\_model.py} module prompts the user to
 click on the pixels in the RGB image corresponding to the coloured corners of
-the A3 sheet (see figure \ref{fig:clicking}). Information displayed in the image helps the user to select the points in the correct order.
+the A3 sheet (see figure \ref{fig:clicking}). Information displayed in the image
+helps the user to select the points in the correct order.
 
 \begin{figure}[H]
 \centering
@@ -464,29 +570,30 @@ t_{3}
 \end{array} \right]
 $$
 We pass all (x,y,z) coordinates to the point cloud viewer, including 
-the corresponding color value. \\
+the corresponding colour value. \\
 \\
 As you might have noticed, the intrinsic matrix isn't used in the last equation.
 This is because (as we mentioned earlier) the images were already undistorted
 and rectified.
 
-\subsubsection{Defects and todo}
+\subsubsection{Shortcomings}
 
-Defects (at the time of writing):
+Shortcomings (at the time of writing):
 
 \begin{itemize}
 
-\item Something goes wrong in the FindExtrinsicCameraParams2, it returns NaN for the translation vector.
+\item Something goes wrong in the FindExtrinsicCameraParams2, it returns NaN for
+the translation vector. For this reason, we haven't implemented anything
+downstream from this function.
 
-\item We still work with distorted images, since the stereo calibration wasn't done.
+\item We still work with distorted images, since the stereo calibration wasn't
+done.
 
 \item We don't know if the cubicle size is correct.
 
-\item We haven't implemented anything after we needed after FindExtrinsicCameraParams2 because it doesn't work
-
 \end{itemize}
 
-Todo: 
+\subsubsection{Areas for improvement}
 
 \begin{itemize}
 
@@ -494,11 +601,12 @@ Todo:
 
 \item Find a replacement for FindExtrinsicCameraParams2%todo
 
-\item Apply the extrinsic matrix to all object points and check if values of those points are between the depth boundaries.%todo
+\item Apply the extrinsic matrix to all object points and check whether values
+of those points are between the depth boundaries.%todo
 
 \item Send points to the point cloud viewer%todo
 
-\item Color the points using the rgb image%todo
+\item Colour the points using the rgb image%todo
 
 \item Auto detect the corners of our "working field"%todo
 
@@ -506,52 +614,50 @@ Todo:
 
 \section{Point Cloud Viewer}
 
-The point cloud viewer was developed after examining various possible
-bases, such as: PCL(see pointclouds.org, A very large production-class project for
-anything to do with point clouds), PyGame and Visual. Visual is also know
-as VPython.
+The point cloud viewer was developed after examining various possible bases,
+such as: PCL (see pointclouds.org, A very large production-class project for
+anything to do with point clouds), PyGame and Visual. Visual is also know as
+VPython.\\
 
-For a very short period of time we tried using the mpl\_toolkit provided
-by matplotlib, but as it has no support for OpenGL it isn't very suited
-for rendering a large amount of points in 3D.
+We briefly tried using the mpl\_toolkit provided by matplotlib, but as it has no
+support for OpenGL it isn't very suited for rendering a large number of points
+in 3D.\\
 
-The PCL library was of course
-very tempting, but very soon it became apparent this was way too much horse
-power for our needs. What we needed was a simple interface that allowed viewing
-of point clouds, rotating, moving and zooming them with mouse and keyboard
-controls.
+The PCL library was of course very tempting, but it soon became apparent this
+was too much horse power for our needs. What we needed was a simple interface
+that allowed one to view, rotate move and zoom point clouds using mouse and
+keyboard controls.\\
 
-PyGame allows for very easy initialisation of OpenGL using SDL and can therefore
-easily handle point clouds using most of today's graphics hardware. But it still
-did not provide an easy way of controlling the camera. Rotation would require
-using some sort of mathematical library implementing quaternion spherical rotation.
+PyGame allows for convenient initialisation of OpenGL using SDL and can
+therefore easily handle point clouds using most of today's graphics hardware.
+But it lacked means to control the camera position. Rotation would require some
+sort of mathematical library implementing quaternion spherical rotation.\\
 
-Enter VPython, a package attempting to implement a simple 3D programming
-language on top of Python and allowing interactive terminal control of the
-3D scene. VPython officially is composed of: Python (of course), IDLE the
-interactive Python programming environment and the visual module. When we
-discoverd the visual module used OpenGL, offers mouse orientation
-controls by default, and to top it off uses NumPy for all its data manipulation
-our course of action became very clear. Since the Kinect library provides its
-data in NumPy arrays, after simple manipulation the point clouds can be fed into
-visual with the simple command "points".
+Enter VPython, a package that attemps to implement a simple 3D programming
+language on top of Python and which allows interactive terminal control of the
+3D scene. VPython is officially composed of: Python (of course), IDLE the
+interactive Python programming environment, and the visual module. When we
+discoverd the visual module employs OpenGL, offers mouse orientation controls by
+default, and to top it off uses NumPy for all its data manipulation, our course
+of action became very clear. Since the Kinect library provides its data in NumPy
+arrays, after simple manipulation the point clouds can be fed into visual with
+the simple command "points".\\
 
 Currently the point cloud viewer does not support realtime capture, but capture
-is done quickly and easily using the 'c' key.
+is done quickly and easily using the 'c' key.\\
 
-The low-level interface includes the option for depth smoothing.
 
 \section{Combining it all}
 
 % in para below: "from files" = the matrices or the images?
 
-The \texttt{Kinect.py} offers a user interface to the application. The file can
-be executed using command line arguments to load matrices for undistoring and
-rectifying the images from files. Once executed, the \texttt{Kinect.py} module
-offers the user a menu. The first menu item offers a calibration process in case
-this has not yet been performed.  Via the second menu choice the user can start
-to build a 3d model. This opens: a point cloud viewer; an ``rgb'' screen that
-displays images from the rgb camera; and a ``depth'' screen that displays depth
-camera images. Whenever the user triggers an image capture, all points are sent
-to the point cloud viewer. Pressing \texttt{esc} closes all windows and returns
-the user to the menu.
+The \texttt{Kinect.py} module offers a user interface to the application. The
+file can be executed using command line arguments to load matrices for
+undistoring and rectifying the images from files. Once executed, the
+\texttt{Kinect.py} module offers the user a menu. The first menu item offers a
+calibration process in case this has not yet been performed. Via the second
+menu choice the user can start to build a 3d model. This opens: a point cloud
+viewer; an ``rgb'' screen that displays images from the rgb camera; and a
+``depth'' screen that displays depth camera images. Whenever the user triggers
+an image capture, all points are sent to the point cloud viewer. Pressing
+\texttt{esc} closes all windows and returns the user to the menu.
