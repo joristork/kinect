@@ -1,9 +1,9 @@
 This chapter presents the results of our research into the technical
-underpinnings of the Kinect as a sensing device. Section \ref{howitworks}
+underpinnings of the Kinect as a sensing device. Section~\ref{howitworks}
 describes techniques implemented in the Kinect to produces depth maps, in terms
-of standard concepts from the field of machine vision. Then, section
-\ref{precision} presents measurements, estimates and published data, which
-together characterise the precision of the Kinect as a measurement tool.
+of standard concepts from the field of machine vision. %Then, section
+%\ref{precision} presents measurements, estimates and published data, which
+%together characterise the precision of the Kinect as a measurement tool.
 
 \section{Overview: What is a Kinect}
 
@@ -18,8 +18,8 @@ the Xbox 360.
 
 \subsection{Specifications}
 
-Table \ref{tab:specs} provides an overview of the electronic components that
-comprise the Kinect's sensor array.
+Table~\ref{tab:specs} on page~\pageref{tab:specs} provides an overview of the
+electronic components that comprise the Kinect's sensor array.
 
 \begin{table}[ht]
 \centering
@@ -47,8 +47,8 @@ only usable pixel size is 640x480. Framerate: 30Hz. \cite{FREENECT} Depth range
 1.2m to 3.5m according to retail description.\cite{PLAY} Actual range
 capability: ~ 0.7m-0.6m (unconfirmed source).\\
 
-Infrared projector & Although non-reliable internet documents refe the use of a
-``laser'' to project the infrared speckle pattern, this is unconfirmed. One
+Infrared projector & Although non-reliable internet sources refer to the use of
+a ``laser'' to project the infrared speckle pattern, this is unconfirmed. One
 patent application relating to the Kinect describes a projecting a ``pattern of
 coherent radiation''.\cite{SHPUNT:2010-1} Section \ref{howitworks} provides more
 detail regading the projection component. \\
@@ -72,22 +72,51 @@ in 16-bit little endian PCM samples (16KHz).\cite{FREENECT}\\
 \section{Theory: How it works}
 \label{howitworks}
 
-Our assessment is that the kinect measures depth using a proprietary extension
-of the standard computer vision process known as stereo triangulation. In this
-section we describe the depth measurement implementation in relatively high
-level terms, from the perspective of theoretical computer vision. These
+This sections describes the depth measurement implementation in relatively
+high level terms, from the perspective of theoretical computer vision. These
 descriptions are based on our interpretation of public records, including
 patents and scholarly as well as casual articles. We also refer, though to a
 lesser extent, to our own experiments with the Kinect.
 
 
+\subsection{Overview: building depth images}
+
+Our assessment is that, irrespective of the precise techniques employed, the
+Kinect uses the following general recipe, implemented in some form of a
+pipeline, to produce depth images: First, the projector projects speckle
+patterns into a scene. Second, the infrared camera produces images that show the
+speckle pattern (c.f.\ figure~\ref{fig:pattern1} on
+page~\pageref{fig:pattern1}), as it reflects from the surfaces of objects in the
+scene. By using a bandpass filter targeted at the wavelength of the projected
+light, the image shows the speckle pattern with high contrast and relatively
+little noise. Third: for each subregion of the image, the device employs one or
+more approaches to solving the so-called ``correspondence problem'' (c.f.\
+section~\ref{sub:corr} below), to find the matching subregion in a reference
+image stored in memory. The resulting disparity value, $d_i$, is written into a
+disparity image. The device then iterates over the disparity image and employs
+triangulation (c.f.\ sections \ref{sub:triang} and \ref{sub:atriang} below) to
+derive the depth value for each subregion, $Z_a$, which it writes to a depth
+image. The following sections first describe the triangulation method, before
+going on to discuss potential solutions to the ``correspondence problem''.
+
+\begin{figure}[ht]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{images/whole_pattern.pdf}
+        \caption{Near-infrared image of speckle pattern}
+        \label{fig:pattern1}
+    \end{center}
+\end{figure}
+
+
 \subsection{Stereo triangulation}
 \label{sub:triang}
 
-Figure \ref{fig:triang} shows the idealised configuration of two cameras,
-$c_{l}$ and $c_{r}$, set up as a stereo unit, and a point, $p$, on an object
-viewed by both cameras. In this model, we simplify: 
-\begin{itemize}
+Evidence suggests that the kinect derives depth values using a proprietary
+extension of the standard computer vision process known as stereo triangulation.
+Figure~\ref{fig:triang} on page~\pageref{fig:triang} illustrates the general
+principle, with an idealised configuration of two cameras, $c_{l}$ and $c_{r}$,
+set up as a stereo unit, and a point, $p$, on an object viewed by both cameras.
+In this model, we simplify: \begin{itemize}
 
     \item   the sensors as pinhole cameras;
 
@@ -108,6 +137,7 @@ viewed by both cameras. In this model, we simplify:
 
 The desired value is $Z_{p}$, i.e.\ the minimum distance from the $x-y$ plane to
 $p$, or the ``depth measurement'' for that point. We obtain $Z_{p}$ from: 
+
 \begin{itemize}
 
     \item the focal length ($f$);
@@ -131,13 +161,14 @@ using the similarity of triangles, which yields equation
 \subsection{Stereo triangulation: the Kinect way}
 \label{sub:atriang}
 
-Figure \ref{fig:atriang} shows the triangulation model adapted, \emph{mutatis
-mutandis}, to a depth camera ($c$) projector ($s$) pair. This is sometimes
-referred to as ``active triangulation'' \cite{alexander1987}, since one replaces
-one passive component (a camera) with an active one (a projector). The same
-simplifications apply as in section \ref{sub:triang}. The projector replaces the
-second camera here, and we distinguish the target point ($p_a$) on the object
-plane from the corresponding point ($p_r$) on a predetermined reference plane.
+Figure~\ref{fig:atriang} on page~\pageref{fig:atriang} shows the triangulation
+model adapted, \emph{mutatis mutandis}, to a depth camera ($c$) projector ($s$)
+pair. This is sometimes referred to as ``active triangulation''
+\cite{alexander1987}, since one replaces one passive component (a camera) with
+an active one (a projector). The same simplifications apply as in section
+\ref{sub:triang}. The projector replaces the second camera here, and we
+distinguish the target point ($p_a$) on the object plane from the corresponding
+point ($p_r$) on a predetermined reference plane.
 
 \begin{figure}[ht]
     \begin{center}
@@ -156,8 +187,9 @@ to a point ($p_r$) on the reference plane by solving the so-called
 reference point $p_r$ is found, the Kinect determines the disparity $d_i$ along
 the $x$-axis in image space between the actual image of $p_a$ and the reference
 image of $p_r$. With that obtained, is it possible to derive the desired ``depth
-measurement'' for the given point, or the minimum distance from the depth
+measurement'' $Z_a$ for the given point, or the minimum distance from the depth
 camera's focal point to the object plane, from: 
+
 \begin{itemize}
 
     \item the focal length ($f$);
@@ -172,40 +204,128 @@ camera's focal point to the object plane, from:
 
 using the similarity of triangles, which yields equations \ref{eq:atriang1} and
 \ref{eq:atriang2}. Substituting for the common variable $d_o$, we simplify to
-obtain equation \ref{eq:atriang2}.
+obtain equation \ref{eq:atriang3}.
+
 %todo show algebra to derive this
 \begin{align} 
     \frac{d_o}{b} = \frac{Z_r - Z_a}{Z_r} \label{eq:atriang1}\\
     \frac{d_i}{f} = \frac{d_o}{Z_a} \label{eq:atriang2}
 \end{align}
-\begin{equation} \label{eq:atriang2}
+\begin{equation} \label{eq:atriang3}
     Z_a = \frac{Z_r}{d_i \frac{Z_r}{b f} + 1}
 \end{equation}
 
 %todo: describe the issue of non-parallel cameras, epipolar lines, and how this
 %is solved with image transformations.
 
+
 \subsection{Correspondence problem}
 \label{sub:corr}
 
-A key challenge to the active stereo triangulation method, described in sections
-\ref{sub:triang} and \ref{sub:atriang} above, is that of matching $x_a$ pixels
-in the depth camera images with the corresponding $x_r$ pixels in the reference
-image. In this section we highlight four different solutions to this
-``correspondence problem'': scale-invariant transformations; region growing;
-scale identification; and multiple reference images. In all cases the Kinect
-uses properties of the projected speckle pattern (shown in figure
-\ref{fig:pattern}) to match subregions of the recorded depth images with their
-counterparts in one or more ``reference'' images of the same pattern stored in
-non-volatile memory.
+In this section we highlight four potential solutions to the correspondence
+problem, i.e.\ that of having to match subregions of the infrared camera images
+with the corresponding subregions in one or more reference images stored in
+memory. The coordinates of these pairs of subregions are necessary to derive
+the disparity values, $d_i$, needed for the triangulation process described
+above.  It is not unlikely that the Kinect implements some combination of these
+and/or other methods, in order to solve the correspondence problem.
+
+Note that, as implied in the triangulation approach described, matching occurs
+along the horizontal axis only. So, the device successively attempts to match
+subregions (of a fixed size) in the infrared image, by searching for the most
+similar subregion along a horizontal band on either side of the subregion in
+question. The axes in the image along which disparities occur as a function of
+object depth are called the ``epipolar lines''. With parallel camera and
+projector norms, these lines are parallel to the image $x$-axis. In case the
+camera and projector are not lines up in this way, calibration and subsequent
+image transformations can compensate.
+
+
+\subsubsection{Scale-invariant transformations}
+
+In order to recognise matching subregions across the actual and reference
+speckle pattern images, the Kinect must overcome the fact that the scale of the
+patterns varies with depth. One approach to dealing with this, is to match
+scale-invariant representations of the respective sets of subregions. A class of
+transformation functions, the Mellin transform(ref), is widely used in computer
+vision to create such scale-invariant representations of an image. Much as the
+Fourier transform of a function does not vary as one shifts that function along
+its domain, the Mellin transform of a function equals the Mellin transform of a
+scaled version of that function (c.f.\ (strongly simplified)
+equation~\ref{eq:mellin1}).
+
+\begin{equation} \label{eq:mellin1}
+    M (f) = M(scale(f))
+\end{equation}
+
+The scale invariance of the Mellin tranform of an image holds only for scaled
+images sharing the same centre point. A device using this approach to the
+correspondence problem would need to store the Mellin transforms of all
+subregions, of a given size, of a reference image of the speckle pattern. The
+device would then use a correlation algorithm to compare these stored values
+with the Mellin transforms of subregions to either side of the target point
+along the epipolar line. The highest match would yield the coordinates of $x_r$.
+
+
+\subsubsection{Coded light}
+
+The coded light technique helps solve the correspondence problem in active
+stereo triangulation set-ups. It is in fact a large class of techniques in which
+information is encoded in some combination of colour and/or luminance and/or
+patterns of shapes in the projected image. The information enables the
+reconstruction of a subregion's coordinates in the projected image, when viewing
+the projection of the image in a scene.
+
+Since neither our own experiments, nor any of the patents and articles that we
+reviewed suggested any significant colour or luminance differentiation in the
+Kinect's use of its projected speckle pattern, we conclude that any use of light
+coding would rely on patterns alone.
+
+A simple example of a light coding technique involving patterns would encode de
+Bruijn sequences in patterns of vertical stripes %, as shown in
+%figure~\ref{fig:debruijn} (page~\pageref{fig:debruijn}, 
+allowing for horizontal
+localisation. A variety of light coding that evokes the Kinect's grid of
+speckles (c.f.\ figure~\ref{fig:speckle}, page~\pageref{fig:speckle} that of
+``pseudo-random binary arrays'' of light (c.f. figure~\ref{fig:prba},
+page~\pageref{fig:prba}) \cite{geng2011structured}).
 
 \begin{figure}[ht]
     \begin{center}
-        \includegraphics[width=1.0\textwidth]{images/whole_pattern}        
-        \caption{Near-infrared image of speckle pattern}
-        \label{fig:pattern1}
+        \includegraphics[width=1.0\textwidth]{images/speckle.pdf}
+        \caption{Kinect speckle pattern}
+        \label{fig:speckle}
     \end{center}
 \end{figure}
+
+
+\begin{figure}[ht]
+    \begin{center}
+        \includegraphics[width=1.0\textwidth]{images/prba.pdf}
+        \caption{Light coding by Pseudo Random Binary Array}
+        \label{fig:prba}
+    \end{center}
+\end{figure}
+
+
+\subsubsection{Scale identification}
+
+In this approach, the speckle pattern is constructed so that the average
+distance from any given speckle so a set number of nearest speckles has a
+predetermined relation to the scale of the image. Once this is established, the
+image is altered to match the reference image's scale, whereafter correlation is
+performed for each subregion along its horizontal band to obtain a corresponding
+region in the reference image.
+
+
+\subsubsection{Multiple reference images}
+
+Finally, it is possible that the Kinect in fact holds a number of reference
+images of the speckle pattern of different scales. Correlation based matching
+could then be carried out in parallel, for example using a chip optimised for
+such a parallel task, for find corresponding subregions. Note that the speckle
+pattern would then need to be configured so that there are no significantly
+similar subregions across the various scales of reference image.
 
 %todo describe experiment with pictures... 
 
@@ -215,18 +335,18 @@ non-volatile memory.
 
 
 
-\section{Precision of the intrument}
-\label{precision}
+%\section{Precision of the intrument}
+%\label{precision}
 
 %todo: just take data from article
-In this section we describe the Kinect's characteristics as a depth measurement
-tool, and notably the precision of the measurements.
+%In this section we describe the Kinect's characteristics as a depth measurement
+%tool, and notably the precision of the measurements.
 
 
-\subsection{Depth precision}
-
-\subsubsection{Sources of error}
-
-\subsection{Depth image resolution}
-
-\subsubsection{Sources of error}
+%\subsection{Depth precision}
+%
+%\subsubsection{Sources of error}
+%
+%\subsection{Depth image resolution}
+%
+%\subsubsection{Sources of error}
