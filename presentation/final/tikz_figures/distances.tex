@@ -1,0 +1,37 @@
+\begin{tikzpicture}[scale=0.30, cap=round]
+
+    % let's define some key values
+    \def\xc{-12}
+    \def\xs{-3}
+    \coordinate (p) at (12,7);
+    \coordinate (n1) at (13.75,8.5);
+    \coordinate (n2) at (8,7.75);
+    \coordinate (n3) at (13.25,2.5);
+    \coordinate (nk) at (3,4);
+
+    % Styles
+    \tikzstyle{axes}=[]
+
+    \begin{scope}[style=axes]
+    \draw[->, gray] (0,0) -- (15,0) node (xaxis) [below] {$x$};
+    \draw[->, gray] (0,0) -- (0,10) node (yaxis) [above] {$y$};
+
+    \end{scope}
+
+    % point
+    \draw [fill, red] (p) circle (0.05) node [below right] {$x_i$};
+
+    % neighbours
+    \draw [fill] (n1) circle (0.05) ;
+    \draw [fill] (n2) circle (0.05) ;
+    \draw [fill] (n3) circle (0.05) ;
+    \draw [fill] (nk) circle (0.05) ;
+
+
+    % distances 
+    \draw[<->, dotted, gray] (p) -- (n1) node [midway, left, gray] {$d_1$};
+    \draw[<->, dotted, gray] (p) -- (n2) node [midway, left, gray] {$d_2$};
+    \draw[<->, dotted, gray] (p) -- (n3) node [midway, left, gray] {$d_3$};
+    \draw[<->, dotted, gray] (p) -- (nk) node [midway, left, gray] {$d_k$};
+    
+\end{tikzpicture}

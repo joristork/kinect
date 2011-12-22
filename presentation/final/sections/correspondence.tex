@@ -1,69 +1,134 @@
 \section{Correspondence}
-\begin{frame}{(Actieve) Stereotriangulatie}
 
-{\large Bepaalt afstand $Z_a$}
-
-%\centerline{\includegraphics[scale=0.4, clip=true, viewport= 120 230 470 470]{triang}}
+\begin{frame}{Recap: diepte meten}
 \centerline{\input{tikz_figures/projection_triangulation}}
-\vfill
-\pause
-{\large Rekenvoorbeeld: twee parallele pinhole cameras}
-\pause
-$$
-\frac{z_1}{b} = \frac{z_1 - f}{b-x_l+x_r}\quad \pause\implies\quad z_1 = \frac {bf} {x_l - x_r}
-$$
+\begin{block}{Bepaal afstand $Z_a$}
+{\small \begin{equation*} 
+    \{ \frac{d_o}{b} = \frac{Z_r - Z_a}{Z_r}, \ \ \frac{d_i}{f} = \frac{d_o}{Z_a} \} \implies Z_a = \frac{Z_r}{d_i \frac{Z_r}{b f} + 1}
+\end{equation*}
+}
+\end{block}
 \end{frame}
 
-\begin{frame}{Actieve stereotriangulatie}{}
-{\large Algemene situatie}
-\begin{enumerate}
-\item camera
-\item projector, laser of lamp
-\end{enumerate}
-\vfill
-\pause
-\centerline{\includegraphics[scale=0.17]{structuredlight.jpg}\, \includegraphics[scale=1, clip=true, viewport= 0 0 80 63]{kinect-pattern}}
-\vfill
-\pause
-{\large Rekenvoorbeeld: `Kinect' met \'e\'en geprojecteerd punt}
-\pause
-$$
-z_1 = \frac {z_0bf}{bf + r_0d}
-$$
+\begin{frame}{Recap: diepte meten}
+\centerline{\input{tikz_figures/di_emphasis}}
+\begin{block}{Bepaal afstand $Z_a$}
+{\small \begin{equation*} 
+    \{ \frac{d_o}{b} = \frac{Z_r - Z_a}{Z_r}, \ \ \frac{d_i}{f} = \frac{d_o}{Z_a} \} \implies Z_a = \frac{Z_r}{d_i \frac{Z_r}{b f} + 1}
+\end{equation*}
+}
+\end{block}
 \end{frame}
-
-\begin{frame}{Actieve stereotriangulatie}\vspace{-4pt}
-\centerline{\includegraphics[scale=0.15, viewport=50 0 2700 1800, clip=true]{kinect_speckle.jpg}}
-\end{frame}
-
-%\begin{frame}{Actieve stereotriangulatie}\vspace{-4pt}
-%\centerline{\includegraphics[scale=1.3]{kinect-pattern}}
-%\end{frame}
 
 \begin{frame}{Correspondence problem}
-
-\begin{block}{Correspondence problem}
-Welke referentiepunt hoort bij mijn punt?
-\end{block}
-\vfill
-\pause
-{\large Een oplossing}
-\begin{columns}[t]
-\column{.6\textwidth}
+\centerline{\includegraphics[scale=0.15]{images/whole_pattern}}
+\begin{block}{Vier oplossingen}
 \begin{enumerate}
-\item<+-> maak referentiebeelden
-\item<+-> neem camerabeeld
+\item Schaal invariante transformaties
+\item Light coding
+\item Schaal identificatie
+\item Meerdere referentie beelden
+\end{enumerate}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Correspondence problem}
+\centerline{\includegraphics[scale=0.50]{images/mellin1}}
+\begin{block}{Scale invariant transforms}
+Mellin Transform
+\end{block}
+\pause
+\begin{enumerate}
+\item<+-> bewaar (Fourier-) Mellin representaties
 \item<+-> voor elk punt
 \begin{enumerate}[a.]
-\item<+-> neem regio
-\item<+-> bepaal schaal
-\item<+-> correleer regio over referentiebeeld met die schaal
-\item<+-> punt met hoogste correlatie is referentiepunt
+\item<+-> maak (F)M representaties van subregio's langs epipolaire lijn
+\item<+-> correleer deze met bewaarde representaties
+\item<+-> coordinaten referentie subregio met hoogste correlatie $\equiv x_r$
 \end{enumerate}
 \end{enumerate}
-\column{.4\textwidth}
-\uncover<2->{ref.\\\includegraphics[scale=0.4]{kinect-pattern}}
-\\
-\uncover<3->{camera\\\includegraphics[scale=0.4]{kinect-pattern}}
-\end{columns}
+\end{frame}
+
+\begin{frame}{Correspondence problem}
+\centerline{\includegraphics[scale=0.17]{structuredlight.jpg}}
+\begin{block}{Light coding}
+\begin{itemize}
+\item specifiek voor actieve stereo triangulatie
+\item patronen (e.g.\ de bruijn sequenties), kleuren, luminantie
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Correspondence problem}
+\centerline{\includegraphics[scale=0.25]{images/prba}\, \includegraphics[scale=1, clip=true, viewport= 0 0 80 63]{kinect-pattern}   }
+\begin{block}{Light coding}
+Peudo Random Binary Array
+\end{block}
+\pause
+\begin{enumerate}
+\item<+-> stap een
+\item<+-> voor elk punt
+\begin{enumerate}[a.]
+\item<+-> substap een
+\item<+-> substap twee
+\item<+-> substap drie
+\end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Correspondence problem}
+\centerline{\includegraphics[scale=0.25]{images/prba}\, \includegraphics[scale=1, clip=true, viewport= 0 0 80 63]{kinect-pattern}   }
+\begin{block}{Light coding}
+Peudo Random Binary Array
+\end{block}
+\pause
+\begin{enumerate}
+\item<+-> stap een
+\item<+-> voor elk punt
+\begin{enumerate}[a.]
+\item<+-> substap een
+\item<+-> substap twee
+\item<+-> substap drie
+\end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Correspondence problem}
+\centerline{\input{tikz_figures/distances}}
+\begin{block}{Schaal identificeren}
+Gemiddelde afstanden
+\end{block}
+\pause
+\begin{enumerate}
+\item<+-> maak patroon waarvoor: 
+\begin{enumerate}[a.]
+\item<+-> $\overline{d_i}$ (zie plaatje), uniform over alle punten
+\end{enumerate}
+\item<+-> bewaar een referentie beeld en $R:\overline{d}\mapsto s$ ($s \equiv$ schaal)
+\item<+-> voor elk punt
+\begin{enumerate}[a.]
+\item<+-> bereken $s$ m.b.v\ $R$
+\item<+-> correleer langs horizontaal, met referentie beeld geschaald met $s$
+\end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Correspondence problem}
+\centerline{\includegraphics[scale=0.25]{images/pyramid}}
+\begin{block}{Meerdere referentie beelden}
+\begin{itemize}
+\item geschikt voor parallelisatie
+\item beperkte diepte
+\end{itemize}
+\end{block}
+\pause
+\begin{enumerate}
+\item<+-> maak en bewaar aparte referentiebeelden voor reeks schalen
+\item<+-> voor elk punt
+\begin{enumerate}[a.]
+\item<+-> correleer regios links en rechts met alle referentie beeld
+\item<+-> referentie subregio met hoogste correlatie $\equiv x_r$
+\end{enumerate}
+\end{enumerate}
 \end{frame}

@@ -43,77 +43,77 @@
     \tikzstyle{axes}=[]
 
     \begin{scope}[style=axes]
-    \draw[->, thick] (0,0) -- (-15,0) node (xaxis) [below] {$x$};
-    \draw[->, thick] (0,0) -- (0,10) node (zaxis) [above] {$z$};
-    \draw[->, very thick] (0,0) -- (0.5,-0.625) node [below] {$y$};
+    \draw[->, gray] (0,0) -- (-15,0) node (xaxis) [below] {$x$};
+    \draw[->, gray] (0,0) -- (0,10) node (zaxis) [above] {$z$};
+    \draw[->, gray] (0,0) -- (0.5,-0.625) node [below] {$y$};
 
     \end{scope}
 
     % point on object
-    \draw [fill, red] (pa) circle (0.05) node [above right] {$p_a$};
+    \draw [fill, gray] (pa) circle (0.05) node [above right] {$p_a$};
 
     % point on reference plane
-    \draw [fill, purple] (pr) circle (0.05) node [above right] {$p_r$};
+    \draw [fill, gray] (pr) circle (0.05) node [above right, gray] {$p_r$};
 
     % left camera
-    \draw [fill, blue] (-12,0) circle (0.05) node [below left] {$c$};
+    \draw [fill, gray] (-12,0) circle (0.05) node [below left, gray] {$c$};
     % left image plane
-    \draw[-, thick] (\xc - \imageplaneshalfwidth,\yimageplanes) -- 
+    \draw[-, gray] (\xc - \imageplaneshalfwidth,\yimageplanes) -- 
         (\xc + \imageplaneshalfwidth, \yimageplanes);
 
     % right camera
-    \draw [fill, blue] (-3,0) circle (0.05) node [below right] {$s$};
+    \draw [fill, gray] (-3,0) circle (0.05) node [below right, gray] {$s$};
 
     % depth plane
-    \draw[dashed, domain=-16:2] plot (\x, {\objectdepth});
+    \draw[dashed, gray, domain=-16:2] plot (\x, {\objectdepth});
      
     % Reference plane
-    \draw[dashed, domain=-16:2] plot (\x, {\referencedepth});
+    \draw[dashed, gray, domain=-16:2] plot (\x, {\referencedepth});
     % p_r
 
     % image ray
-    \draw[dotted] (pa)--(c);
+    \draw[dotted, gray] (pa)--(c);
 
     % projection ray
-    \draw[dotted] (pr)--(s);
+    \draw[dotted, gray] (pr)--(s);
     
     % expected image ray
-    \draw[dotted] (c)--(pr);
+    \draw[dotted, gray] (c)--(pr);
 
     % image points
-    \draw[fill, orange] (pixel) circle (0.05) node [below right] {$x$};
+    \draw[fill, gray] (pixel) circle (0.05) node [below right, gray] {$x$};
 
     % focal length
-    \draw[<->, thick, gray] (\xc - \xdistoffsetf,0) -- (\xc - \xdistoffsetf,\yimageplanes)
+    \draw[<->, gray] (\xc - \xdistoffsetf,0) -- (\xc - \xdistoffsetf,\yimageplanes)
         node [midway, left, gray] {$f$};
     
     % Camera norms
     % left
-    \draw[->] (c) -- (\xc, \referencedepth + 1);
+    \draw[->, gray] (c) -- (\xc, \referencedepth + 1);
     % perpendicular symbol
-    \draw[thick] (\xc,0.15) -| (\xc-0.15, 0); 
+    \draw[gray] (\xc,0.15) -| (\xc-0.15, 0); 
     % right
-    \draw[->] (s) -- (\xs, \referencedepth + 1);
+    \draw[->, gray] (s) -- (\xs, \referencedepth + 1);
     % perpendicular symbol
-    \draw[thick] (\xs,0.15) -| (\xs +0.15, 0); 
+    \draw[gray] (\xs,0.15) -| (\xs +0.15, 0); 
     %(\xs,0)
     
     % actual depth
-    \draw[<->, thick, gray] (\xc - \xdistoffsetZa, 0)
+    \draw[<->, gray] (\xc - \xdistoffsetZa, 0)
         -- (\xc - \xdistoffsetZa, \objectdepth)
         node [midway, left, gray] {$Z_{a}$};
     % reference depth
-    \draw[<->, thick, gray] (\xc - \xdistoffsetZr, 0)
+    \draw[<->, gray] (\xc - \xdistoffsetZr, 0)
         -- (\xc - \xdistoffsetZr, \referencedepth)
         node [midway, left, gray] {$Z_{r}$};
     
     % camera distance
-    \draw[<->, very thick, gray] (\xc,\ydistoffsetb) -- (\xs,\ydistoffsetb)
-        node [midway, below, gray] {$b$};
+    \draw[<->, gray] (\xc,\ydistoffsetb) -- (\xs,\ydistoffsetb)
+        node [midway, gray] {$b$};
     
     % point disparity over epipolar line
-    \draw[<->, very thick, gray] (cprodi) -- (pa) node [midway, above, gray] {$d_o$};
+    \draw[<->, gray] (cprodi) -- (pa) node [midway, above, gray] {$d_o$};
     % point disparity over image plane
-    \draw[<->, very thick, gray] (epixel) -- (pixel) node [midway, above, gray] {$d_i$};
+    \draw[<->, very thick, red] (epixel) -- (pixel) node [midway, above, red] {$d_i$};
     
 \end{tikzpicture}
