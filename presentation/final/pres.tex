@@ -14,6 +14,7 @@
 %\usetikzlibrary{arrows}
 %\usetikzlibrary{positioning}
 %\usepackage{stmaryrd}
+\usepackage{listings}
 \usetheme{Watergraafsmeer}
 
 \usepackage{enumerate}
@@ -24,19 +25,35 @@
 %\tikzstyle{every picture}+=[remember picture]
 
 % front stuff
-\author{Joris Stork en Jeroen Zuiddam}
+\author{Joris Stork, Jeroen Zuiddam en Lucas Swartsenburg}
 \title{Kinect: hoe werkt het?}
 \date{}
 
 \begin{document}
 
+\lstset{ %
+language=Python,                % the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,                   % adds a frame around the code
+tabsize=2,                      % sets default tabsize to 2 spaces
+captionpos=b,                   % sets the caption-position to bottom
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+}
+
+
+
+\section{Introductie}
 %% frame %%
 \setbeamercolor{headline}{parent=white}
 \begin{frame}
 \titlepage
 \end{frame}
 \setbeamercolor*{headline}{parent=palette primary}
-\section{}
 
 \begin{frame}{Kinect}{}
 \centerline{
@@ -45,23 +62,44 @@
 
 \pause
 \vfill
+Vandaag beginnen we met: \\
 \begin{columns}
 \column{.25\textwidth}
-project:
 \begin{enumerate}
 \item \alt<3->{\textbf{werking}}{werking}
 \item applicatie
 \end{enumerate}
 \pause
 \column{.5\textwidth}
-vandaag:
 \begin{enumerate}
-\item stereotriangulatie
-\item correspondence problem
+\item \textbf{stereotriangulatie}
+\item \textbf{correspondence problem}
 \end{enumerate}
 \end{columns}
 \end{frame}
 
+\begin{frame}{Kinect}{}
+\centerline{
+\includegraphics[scale=0.3, viewport= 40 120 1190 460, clip=true]{kinect.jpg}
+}
+\vfill
+Daarna:\\
+\begin{columns}
+\column{.25\textwidth}
+\begin{enumerate}
+\item werking
+\item \textbf{applicatie}
+\end{enumerate}
+\column{.5\textwidth}
+\begin{enumerate}
+\item \textbf{Stereo calibratie}
+\item \textbf{Creating a model}
+\item \textbf{Point cloud viewer}
+\end{enumerate}
+\end{columns}
+\end{frame}
+
+\section{Werking}
 \begin{frame}{Stereotriangulatie}
 
 {\large Algemene situatie: twee willekeurige camera's}
@@ -130,7 +168,153 @@ Welke referentiepunt hoort bij mijn punt?
 \end{columns}
 \end{frame}
 
+\section{Applicatie}
+\subsection{Freenect}
+\begin{frame}{Modifications to Freenect}
+\begin{itemize}
+\item Freenect: opensource driver Kinect
+\item Geen infrarood beeld
+\item Hack nodig voor calibratie
+\end{itemize}
+\pause
+\includegraphics[scale=0.4]{kinect-ir-image.jpg}
+
+\end{frame}
+\subsection{Calibratie}
+
+
+\begin{frame}{Stereo calibratie}
+\alt<2->
+{
+\[
+s m' = A \left[R|t\right]M'
+\]
+or
+\[
+s 
+\left[ \begin{array}{c} 
+u\\
+v\\
+1  
+\end{array} \right]
+=
+\left[ \begin{array}{ccc} 
+f_x & 0 & c_x\\
+0 & f_y & c_y\\
+0 & 0 & 1  
+\end{array} \right]
+\left[ \begin{array}{cccc}
+r_{11} & r_{12} & r_{13} & t_1\\
+r_{21} & r_{22} & r_{23} & t_2\\
+r_{31} & r_{32} & r_{33} & t_3
+\end{array} \right]
+\left[ \begin{array}{c} 
+X\\
+Y\\
+Z\\
+1  
+\end{array} \right]
+\]\\
+$f_{x},f_{y}$: focal lengths\\
+$c_x,c_y$: coordinaten van principal point
+}
+{
+\begin{itemize}
+\item Undistort
+\item Rectify
+\item Translate
+\end{itemize}
+\centerline{\includegraphics[scale=0.4]{rectify.jpg}}
+}
+\end{frame}
+
+\begin{frame}{Open CV}
+\alt<2->
+{
+\centerline{\includegraphics[scale=0.4]{chessboard.png}}
+}
+{
+We gebruiken:
+\begin{itemize}
+\item \texttt{FindChessboardCorners}
+\item \texttt{DrawChessboardCorners}
+\item \texttt{StereoCalibrate}
+\item \texttt{StereoRectify}
+\item \texttt{FindHomography}
+\end{itemize}
+}
+\end{frame}
+
+\begin{frame}{Echte diepte}
+Dr. St ́phane Magnenat
+
+\begin{itemize}
+\item $depth = 12.36 * tan(rawdepth / 2842.5 + 1.1863)$
+\end{itemize}
+\end{frame}
+
+\subsection{Model maken}
+\begin{frame}{3D model maken}
+Eerst:
+\begin{itemize}
+\item \texttt{InitUndistortRectifyMap}
+\item \texttt{WarpPerspective}
+\end{itemize}
+\end{frame}
+\begin{frame}{Extrinsic matrix}
+\alt<2->{
+\centerline{\includegraphics[scale=0.4]{axis.png}}
+}
+{
+Extrinsic matrix met \texttt{FindExtrinsicCameraParams2} en \texttt{Rodriques2}
+$$
+s \left[ \begin{array}{ccc} 
+u\\
+v\\
+1 \end{array} \right] = 
+\left[ \begin{array}{cccc} 
+r_{11} & r_{12} & r_{13} & t_{1}\\
+r_{21} & r_{22} & r_{23} & t_{2}\\
+r_{31} & r_{32} & r_{33} & t_{3} \end{array} \right] 
+\left[ \begin{array}{ccc} 
+x\\
+y\\
+z\\
+1  \end{array} \right] 
+$$
+}
+\end{frame}
+\begin{frame}{De punten verkrijgen}
+Bepaal de waarde voor $s$ door $depth(u,v)$.
+$$
+\left[ \begin{array}{c} 
+x\\
+y\\
+z\end{array} \right] 
+=
+\left[ \begin{array}{ccc} 
+r_{11} & r_{12} & r_{13}\\
+r_{21} & r_{22} & r_{23}\\
+r_{31} & r_{32} & r_{33}
+\end{array} \right]^{-1}
+\left[ \begin{array}{c} 
+u s\\
+v s\\
+s \end{array} \right]
+-
+\left[ \begin{array}{c} 
+t_{1}\\
+t_{2}\\
+t_{3}
+\end{array} \right]
+$$
+\end{frame}
+\subsection{PCV}
+\begin{frame}{Point cloud viewer}
+VPython
+\end{frame}
 \setbeamercolor{headline}{parent=white}
+
 \begin{frame}
 
 \end{frame}
