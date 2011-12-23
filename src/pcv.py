@@ -7,6 +7,10 @@ import time
 cached_data = False
 MAX_DEPTH=2047
 scene = display()
+posi = [0.0, 0.0, 0.0]
+old_posi = list(posi)
+auto_capture = False
+auto_capt_count = 0
 
 # NOTE: I have left this code here for documentative purposes
 # We will be removing this in the future
@@ -85,21 +89,51 @@ def capture(cached_data=False):
 
     pts = points(pos=pos_list)
 
-    # Restore old position.
     if old_pts:
-        pts.x = old_pts.x
-        pts.y = old_pts.y
-        pts.z = old_pts.z
-
         old_pts.visible = False
+
+    # Restore old position.
+    pts.x += posi[0]
+    pts.y += posi[1]
+    pts.z += posi[2]
 
     print "Captured..."
 
 capture(cached_data=cached_data)
 
+def update_position():
+    """
+    Update object position.
+    """
+
+    global old_posi
+
+    # Reset position
+    print old_posi
+    pts.x -= old_posi[0]
+    pts.y -= old_posi[1]
+    pts.z -= old_posi[2]
+
+    # Set position
+    print posi
+    pts.x += posi[0]
+    pts.y += posi[1]
+    pts.z += posi[2]
+
+    # Update delta
+    old_posi = list(posi)
+
 while True:
     rate(60)
+
+    if auto_capture:
+        auto_capt_count += 1
+        if auto_capt_count > 19:
+            auto_capt_count = 0
+            capture(cached_data=cached_data)
+
     if scene.kb.keys: # is there an event waiting to be processed?
+
         s = scene.kb.getkey() # obtain keyboard information
         #if len(s) == 1:
         #    prose.text += s # append new character
@@ -108,16 +142,26 @@ while True:
         #elif s == 'shift+delete':
         #    prose.text = '' # erase all the text
         if s == 'h':
-            pts.x -= 20
+            posi[0] -= 20
+            update_position()
         elif s == 'j':
-            pts.y -= 20
+            posi[1] -= 20
+            update_position()
         elif s == 'k':
-            pts.y += 20
+            posi[1] += 20
+            update_position()
         elif s == 'l':
-            pts.x += 20
+            posi[0] += 20
+            update_position()
         elif s == '[':
-            pts.z -= 20
+            posi[2] -= 20
+            update_position()
         elif s == ']':
-            pts.z += 20
+            posi[2] += 20
+            update_position()
         elif s == 'c':
             capture(cached_data=cached_data)
+        elif s == 'a':
+            auto_capture = not auto_capture
+            print "Auto capturing:", auto_capture
+
